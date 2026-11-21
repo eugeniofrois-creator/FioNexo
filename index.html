@@ -1,399 +1,2116 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FioNexo — Agenda</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f5f0e7;color:#29231f;font:16px system-ui}button,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible,input:focus-visible{outline:3px solid #ad503a;outline-offset:3px}.wrap{max-width:1130px;margin:auto;padding:0 24px}header{background:#25211d;color:#fff8ed}nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0}.brand{font:bold 26px Georgia}.brand span,.tag{color:#e9a886}.hero{position:relative;padding:40px 0 55px;overflow:hidden;background:radial-gradient(ellipse at 85% 80%,#633727,transparent 49%)}.hero .wrap{position:relative}.hero svg{position:absolute;right:6%;top:0;width:210px;opacity:.45;pointer-events:none}h1{font:clamp(42px,8vw,80px)/.95 Georgia;margin:12px 0 18px;letter-spacing:-.045em}h2{font:30px Georgia;margin:0 0 14px}p{line-height:1.5}.tag,.eyebrow{font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}.eyebrow{color:#92432e}.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:24px;margin:28px auto}.card{padding:24px;background:#fffaf2;border:1px solid #e3d9cb;border-radius:20px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:8px}.choice,.pill{background:transparent;border:1px solid #cfbfb0;border-radius:12px;padding:12px}.choice{text-align:left}.choice strong,.choice small{display:block}.choice small{margin-top:5px}.choice[aria-pressed=true],.pill[aria-pressed=true]{border-color:#92432e;background:#f6e2d5;box-shadow:inset 0 0 0 1px #92432e}.pill{padding:8px 12px}.chips{display:flex;flex-wrap:wrap;gap:8px}.cta{background:#833d2c;border:0;color:white;border-radius:12px;padding:12px 16px;font-weight:700}.cta:disabled{opacity:.55;cursor:default}aside .card{position:sticky;top:20px;background:#29231f;color:#fff8ed}aside button{width:100%;margin-top:12px}input{width:100%;padding:10px;border:1px solid #a89585;border-radius:10px;margin-top:6px}hr{border:0;border-top:1px solid #76685c;margin:18px 0}.muted{color:#62584e}.badge{color:#2a6048;font-weight:700}#notice{min-height:24px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid #e3d9cb;padding:12px 0}@media(max-width:660px){.layout{grid-template-columns:1fr;gap:0}.wrap{padding-inline:16px}.card{padding:17px}.hero svg{width:110px;right:0;opacity:.23}nav .pill{font-size:13px}}
-.skip{position:absolute;left:16px;top:12px;z-index:5;background:#fffaf2;color:#29231f;padding:12px;transform:translateY(-180%)}.skip:focus{transform:none}select:focus-visible,a:focus-visible{outline:3px solid #ad503a;outline-offset:3px}.chips button{min-height:44px}
-header{background:#161817}.hero{isolation:isolate;background:radial-gradient(ellipse at 85% 65%,#633727,transparent 56%),linear-gradient(120deg,#171817,#2c211a);padding-block:65px 78px}.hero::before{content:'';position:absolute;inset:-45%;z-index:-1;pointer-events:none;background:conic-gradient(from 45deg,transparent 0 40%,#da805443 48%,transparent 58% 100%);animation:halo 4.5s ease-out both}.hero::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:repeating-linear-gradient(115deg,transparent 0 22px,#fff8ed0e 23px,transparent 24px 44px);mask-image:linear-gradient(90deg,transparent 25%,black)}.hero svg{width:clamp(130px,28vw,320px);right:7%;top:-12px;opacity:.65;filter:drop-shadow(0 0 18px #e9a88666);animation:seal .8s ease-out both}.hero h1{color:#fff5e6;text-shadow:0 6px 32px #0008}.hero h1 em{font-style:normal;color:#f3ab82}.hero .tag{display:inline-block;padding:8px 12px;border:1px solid #e9a88666;border-radius:999px;background:#241a16}.hero p{max-width:32ch;color:#f7e4d4}.hero .wrap>p,.hero h1{animation:rise .55s ease-out both}
-body{background:radial-gradient(ellipse at 100% 0,#edcbb3,transparent 43%),#f5f0e7}.card{box-shadow:0 10px 24px #50302412}.layout>.card,.layout>div>.card{animation:rise .45s ease-out both}.layout>div>.card:nth-child(2){animation-delay:.07s}.layout>div>.card:nth-child(3){animation-delay:.14s}.eyebrow{display:inline-block;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:#f5e3d6}.choice,.pill,.cta{transition:transform .18s,box-shadow .18s,background-color .18s}.choice[aria-pressed=true],.pill[aria-pressed=true]{box-shadow:inset 0 0 0 1px #92432e,0 4px 12px #92432e25}.cta{background:linear-gradient(120deg,#743121,#a24f34);box-shadow:0 6px 14px #51281940}.choice:active,.pill:active,.cta:active{transform:scale(.97)}aside .card{background:linear-gradient(155deg,#33251e,#211d1a 65%);border-color:#7f5b46}
-@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes seal{from{opacity:0;transform:rotate(-12deg) scale(.9)}to{opacity:.65;transform:none}}@keyframes halo{from{transform:rotate(-20deg)}to{transform:rotate(30deg)}}
-@media(hover:hover){.choice:hover,.pill:hover,.cta:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 7px 16px #502a2333}}@media(max-width:660px){.hero{padding-block:42px 48px}.hero svg{right:0;top:12px;opacity:.30;animation:none}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;transform:none}.skip:not(:focus){transform:translateY(-180%)}}
-#bootStatus{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:12px;background:#29231f;color:#fff8ed;z-index:9;box-shadow:0 5px 20px #0003}
-#bootStatus[hidden]{display:none}.save-warning{padding:12px;border:1px solid #92432e;border-radius:10px;background:#fff0d8;color:#602b1a}
-button,input,select{min-height:44px}dialog{max-height:90vh;overflow:auto}#voiceStatus:empty{margin:0}#summary{line-height:1.7}#confirm{min-height:50px}
-@media(max-width:660px){.card{border-radius:16px}.hero{padding-block:28px 34px}.hero h1{font-size:46px}aside .card{position:static}.choice{padding:15px}.row button{flex:1 1 130px}}
-select,input[type=date],input[type=time]{width:100%;padding:14px;border:1px solid #c7b5a3;border-radius:12px;background:#fffdf8;color:#29231f;font:inherit;margin-top:8px}label{font-weight:650}#staff .choice{display:flex;align-items:center;gap:9px;flex-wrap:wrap}#staff small{flex-basis:100%}.light{display:inline-block;width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1px solid #0003;margin-right:7px}.green{background:#21854b;box-shadow:0 0 9px #21854b60}.yellow{background:#e6b421;box-shadow:0 0 9px #e6b42170}.red{background:#cf4034;box-shadow:0 0 9px #cf403460}.off{background:#666;box-shadow:none}#timeFeedback{font-size:15px;line-height:1.5}.hero h1{font-size:clamp(38px,6vw,64px)}.hero{padding:30px 0}.card h2{font-size:27px}#days{margin-top:12px}#summary{white-space:pre-line}
-/* v18: textos extensos não devem alargar cartões ou colunas no celular. */
-.layout>*,.layout>div,.card,.row>*{min-width:0}
-.row,#summary,#notice,#chatInfo,#chatFeedback,#rescheduleFeedback{overflow-wrap:anywhere}
-.choice,.pill,.cta{max-width:100%;white-space:normal;overflow-wrap:anywhere}
-select{max-width:100%}
-/* v27: seleção e controles distinguíveis no modo de alto contraste. */
-@media(forced-colors:active){
- .choice[aria-pressed=true],.pill[aria-pressed=true]{outline:3px solid Highlight;outline-offset:-4px;border-color:Highlight}
- .choice,.pill,.cta{border:1px solid ButtonText}
- .cta:disabled{color:GrayText;border-color:GrayText;opacity:1}
- .light{border:2px solid CanvasText}
-}
-</style>
-<a class="skip" href="#mainContent">Ir para o conteúdo principal</a><header><div class="wrap"><nav><div class="brand">Fio<span>Nexo</span></div><div class="chips"><button type="button" class="pill" id="voice" aria-label="Navegar por voz" aria-describedby="voiceHelp" aria-pressed="false">🎙 Voz</button><button class="pill" id="toggle" aria-controls="panel" aria-expanded="false">Painel do barbeiro</button></div></nav></div><div class="hero"><div class="wrap"><svg viewBox="0 0 180 180" fill="none" stroke="#e9a886" stroke-width="2" aria-hidden="true"><circle cx="90" cy="90" r="82"/><circle cx="90" cy="90" r="74"/><circle cx="60" cy="116" r="15"/><circle cx="120" cy="116" r="15"/><path d="M70 105 118 43 107 85M110 105 62 43 73 85"/><circle cx="90" cy="84" r="3"/></svg><div class="tag">Barbearia · Agenda online</div><h1>Seu corte.<br><em>Seu horário.</em></h1><p>Escolha seu barbeiro e reserve em poucos passos.</p></div></div></header>
-<main class="wrap" id="mainContent" tabindex="-1"><p id="voiceHelp" hidden>Diga: barbearias, serviços, barbeiros, horários, minhas reservas ou painel do barbeiro.</p><p id="voiceStatus" role="status" aria-live="polite" aria-atomic="true"></p><section class="card" style="margin-top:24px"><label for="shop"><strong>Escolha a barbearia</strong></label><select id="shop" style="display:block;width:100%;margin-top:8px;padding:12px;border-radius:10px;font:inherit"></select><p id="shopStatus" role="status" aria-live="polite"></p><small class="muted">Barbearias de exemplo</small></section><div class="layout" id="client"><div><section class="card"><div class="eyebrow">01 · Serviço</div><h2>O que vamos fazer?</h2><div class="grid" id="services" role="group" aria-label="Serviços disponíveis"></div></section><section class="card"><div class="eyebrow">02 · Profissional</div><h2>Escolha seu barbeiro</h2><label>Escolha seu barbeiro<select id="professional"></select></label><div class="grid" id="staff" role="group" aria-label="Barbeiros da barbearia selecionada"></div></section><section class="card"><div class="eyebrow">03 · Data e horário</div><h2>Quando você prefere?</h2><label>Escolha a data<input type="date" id="bookingDate" required></label><div class="chips" id="days" role="group" aria-label="Sugestões de datas"></div><label>Qual horário você prefere?<input type="time" id="preferredTime" aria-describedby="timeHelp timeFeedback" step="60"></label><p id="timeHelp" class="muted">Digite o horário que prefere ou toque em uma sugestão. Os horários disponíveis consideram o serviço, o barbeiro e a data escolhidos.</p><p id="timeFeedback" role="status"></p><p class="muted">Sugestões disponíveis mais próximas</p><div class="chips" id="slots" role="group" aria-label="Horários disponíveis e continuação da reserva"></div></section></div>
-<aside><form class="card" id="reserve"><div class="tag">Sua reserva</div><h2>Resumo</h2><div id="summary" aria-live="polite" aria-atomic="true"></div><hr><label>Seu nome<input id="customer" required maxlength="60" autocomplete="name"></label><button class="cta" id="confirm">Confirmar reserva</button><p><small>Demonstração com dados fictícios · use um nome de exemplo · sem cobrança</small></p></form><section class="card"><h2>Minhas reservas</h2><div id="myBookings"></div></section></aside></div>
-<section class="card" id="panel" hidden><div class="eyebrow">Área do profissional</div><h2>Painel do barbeiro</h2><div class="grid" id="panelStaff"></div><p class="badge" id="status" role="status" aria-live="polite" aria-atomic="true"></p><button class="cta" id="cut"></button> <button class="pill" id="pause"></button> <button class="pill" id="presence"></button><button class="pill" id="shopOpen"></button><h3>Reservas</h3><div id="list"></div></section><p id="notice" role="status" tabindex="-1"></p><dialog id="chat" aria-labelledby="chatTitle" aria-describedby="chatInfo" style="width:min(92vw,460px);border:1px solid #cfbfb0;border-radius:20px;padding:22px"><button type="button" class="pill" id="closeChat">Fechar</button><h2 id="chatTitle">Chat da reserva</h2><p id="chatInfo"></p><ul id="messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Histórico da conversa" tabindex="0" style="max-height:35vh;overflow:auto;overflow-wrap:anywhere"></ul><section id="quickReplies" hidden aria-labelledby="quickTitle"><p id="quickTitle"><strong>Respostas rápidas</strong></p><div class="chips" id="replyButtons"></div></section><form id="sendMessage"><label>Mensagem<input id="messageText" aria-describedby="messageHelp chatFeedback" required maxlength="500"></label><p id="messageHelp">Escreva até 500 caracteres. Revise a mensagem e toque em Enviar.</p><button class="cta">Enviar</button></form><p id="chatFeedback" role="status"></p><small>Conversa de demonstração neste navegador.</small></dialog>
-<dialog id="reschedule" aria-labelledby="rescheduleTitle" aria-describedby="rescheduleContext" style="width:min(92vw,460px);border:1px solid #cfbfb0;border-radius:20px;padding:22px">
- <h2 id="rescheduleTitle">Remarcar reserva</h2>
- <p id="rescheduleContext"></p>
- <form id="rescheduleForm">
-  <label>Nova data<input type="date" id="rescheduleDay" aria-describedby="rescheduleFeedback" required></label>
-  <p><label>Novo horário <select id="rescheduleSlot" aria-describedby="rescheduleFeedback" required></select></label></p>
-  <p id="rescheduleFeedback" role="status"></p>
-  <button class="cta" id="rescheduleConfirm">Confirmar novo horário</button>
-  <button type="button" class="pill" id="closeReschedule">Voltar</button>
- </form>
-</dialog></main>
-<div id="bootStatus" role="status" aria-live="polite">Preparando sua agenda…</div>
-<noscript><style>#bootStatus{display:none}</style><div class="wrap"><p class="save-warning" role="alert">A agenda precisa de JavaScript para funcionar. Ative o JavaScript nas configurações do navegador e recarregue esta página para consultar horários e reservar. Nenhuma reserva pode ser confirmada com o JavaScript desativado.</p></div></noscript>
-<script>
-const $=id=>document.getElementById(id), min=60000;
-const services=[['Corte clássico',30,50],['Barba',30,35],['Corte e barba',45,75]], shops=[{id:'central',name:'Barbearia Central',staff:['Rafael','Lucas']},{id:'bairro',name:'Corte do Bairro',staff:['André','Marcos']}];
-let shop=shops[0],staff=shop.staff;
-for(const entry of shops)$('shop').add(new Option(entry.name,entry.id));
-const storageKey='fionexo-demo-v1';
-let storageProblem='';
-function readState(){
- const empty={bookings:[],staff:{}};
- try{
-  const raw=localStorage.getItem(storageKey);
-  if(!raw)return empty;
-  const stored=JSON.parse(raw);
-  if(!stored||!Array.isArray(stored.bookings)||!stored.staff||typeof stored.staff!=='object'||Array.isArray(stored.staff))throw Error('Formato inválido');
-  return stored;
- }catch{
-  storageProblem='Não foi possível carregar os dados salvos. Para proteger seu histórico, o aplicativo não vai sobrescrevê-los. Reabra a versão anterior ou use outro navegador.';
-  return empty;
- }
-}
-const state=readState();
-function persistState(){
- if(storageProblem){showStorageProblem();return false}
- try{localStorage.setItem(storageKey,JSON.stringify(state));return true}
- catch{storageProblem='Não foi possível salvar. Suas alterações estão apenas nesta aba. Mantenha-a aberta e libere espaço ou permita o armazenamento no navegador.';showStorageProblem();return false}
-}
-function showStorageProblem(){
- $('notice').classList.add('save-warning');
- $('notice').textContent=storageProblem;
-}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>FioNexo — Agenda</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23241b17%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23fff2df%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23ffc198%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f5f0e7;
+        color: #29231f;
+        font: 16px system-ui;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        color: inherit;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #ad503a;
+        outline-offset: 3px;
+      }
+      .wrap {
+        max-width: 1130px;
+        margin: auto;
+        padding: 0 24px;
+      }
+      header {
+        background: #25211d;
+        color: #fff8ed;
+      }
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 0;
+      }
+      .brand {
+        font: bold 26px Georgia;
+      }
+      .brand span,
+      .tag {
+        color: #e9a886;
+      }
+      .hero {
+        position: relative;
+        padding: 40px 0 55px;
+        overflow: hidden;
+        background: radial-gradient(ellipse at 85% 80%, #633727, transparent 49%);
+      }
+      .hero .wrap {
+        position: relative;
+      }
+      .hero svg {
+        position: absolute;
+        right: 6%;
+        top: 0;
+        width: 210px;
+        opacity: 0.45;
+        pointer-events: none;
+      }
+      h1 {
+        font: clamp(42px, 8vw, 80px) / 0.95 Georgia;
+        margin: 12px 0 18px;
+        letter-spacing: -0.045em;
+      }
+      h2 {
+        font: 30px Georgia;
+        margin: 0 0 14px;
+      }
+      p {
+        line-height: 1.5;
+      }
+      .tag,
+      .eyebrow {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .eyebrow {
+        color: #92432e;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+        gap: 24px;
+        margin: 28px auto;
+      }
+      .card {
+        padding: 24px;
+        background: #fffaf2;
+        border: 1px solid #e3d9cb;
+        border-radius: 20px;
+        margin-bottom: 16px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+        gap: 8px;
+      }
+      .choice,
+      .pill {
+        background: transparent;
+        border: 1px solid #cfbfb0;
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .choice {
+        text-align: left;
+      }
+      .choice strong,
+      .choice small {
+        display: block;
+      }
+      .choice small {
+        margin-top: 5px;
+      }
+      .choice[aria-pressed="true"],
+      .pill[aria-pressed="true"] {
+        border-color: #92432e;
+        background: #f6e2d5;
+        box-shadow: inset 0 0 0 1px #92432e;
+      }
+      .pill {
+        padding: 8px 12px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .cta {
+        background: #833d2c;
+        border: 0;
+        color: white;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+      }
+      .cta:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+      aside .card {
+        background: #29231f;
+        color: #fff8ed;
+      }
+      aside button {
+        width: 100%;
+        margin-top: 12px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #a89585;
+        border-radius: 10px;
+        margin-top: 6px;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #76685c;
+        margin: 18px 0;
+      }
+      .muted {
+        color: #62584e;
+      }
+      .badge {
+        color: #2a6048;
+        font-weight: 700;
+      }
+      #notice {
+        min-height: 24px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        border-top: 1px solid #e3d9cb;
+        padding: 12px 0;
+      }
+      @media (max-width: 660px) {
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+        .wrap {
+          padding-inline: 16px;
+        }
+        .card {
+          padding: 17px;
+        }
+        .hero svg {
+          width: 110px;
+          right: 0;
+          opacity: 0.23;
+        }
+        nav .pill {
+          font-size: 13px;
+        }
+      }
+      .skip {
+        position: absolute;
+        left: 16px;
+        top: 12px;
+        z-index: 5;
+        background: #fffaf2;
+        color: #29231f;
+        padding: 12px;
+        transform: translateY(-180%);
+      }
+      .skip:focus {
+        transform: none;
+      }
+      select:focus-visible,
+      a:focus-visible {
+        outline: 3px solid #ad503a;
+        outline-offset: 3px;
+      }
+      .chips button {
+        min-height: 44px;
+      }
+      header {
+        background: #161817;
+      }
+      .hero {
+        isolation: isolate;
+        background:
+          radial-gradient(ellipse at 85% 65%, #633727, transparent 56%),
+          linear-gradient(120deg, #171817, #2c211a);
+        padding-block: 65px 78px;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: -45%;
+        z-index: -1;
+        pointer-events: none;
+        background: conic-gradient(
+          from 45deg,
+          transparent 0 40%,
+          #da805443 48%,
+          transparent 58% 100%
+        );
+        animation: halo 4.5s ease-out both;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          115deg,
+          transparent 0 22px,
+          #fff8ed0e 23px,
+          transparent 24px 44px
+        );
+        mask-image: linear-gradient(90deg, transparent 25%, black);
+      }
+      .hero svg {
+        width: clamp(130px, 28vw, 320px);
+        right: 7%;
+        top: -12px;
+        opacity: 0.65;
+        filter: drop-shadow(0 0 18px #e9a88666);
+        animation: seal 0.8s ease-out both;
+      }
+      .hero h1 {
+        color: #fff5e6;
+        text-shadow: 0 6px 32px #0008;
+      }
+      .hero h1 em {
+        font-style: normal;
+        color: #f3ab82;
+      }
+      .hero .tag {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #e9a88666;
+        border-radius: 999px;
+        background: #241a16;
+      }
+      .hero p {
+        max-width: 32ch;
+        color: #f7e4d4;
+      }
+      .hero .wrap > p,
+      .hero h1 {
+        animation: rise 0.55s ease-out both;
+      }
+      body {
+        background: radial-gradient(ellipse at 100% 0, #edcbb3, transparent 43%), #f5f0e7;
+      }
+      .card {
+        box-shadow: 0 10px 24px #50302412;
+      }
+      .layout > .card,
+      .layout > div > .card {
+        animation: rise 0.45s ease-out both;
+      }
+      .layout > div > .card:nth-child(2) {
+        animation-delay: 0.07s;
+      }
+      .layout > div > .card:nth-child(3) {
+        animation-delay: 0.14s;
+      }
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 8px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #f5e3d6;
+      }
+      .choice,
+      .pill,
+      .cta {
+        transition:
+          transform 0.18s,
+          box-shadow 0.18s,
+          background-color 0.18s;
+      }
+      .choice[aria-pressed="true"],
+      .pill[aria-pressed="true"] {
+        box-shadow:
+          inset 0 0 0 1px #92432e,
+          0 4px 12px #92432e25;
+      }
+      .cta {
+        background: linear-gradient(120deg, #743121, #a24f34);
+        box-shadow: 0 6px 14px #51281940;
+      }
+      .choice:active,
+      .pill:active,
+      .cta:active {
+        transform: scale(0.97);
+      }
+      aside .card {
+        background: linear-gradient(155deg, #33251e, #211d1a 65%);
+        border-color: #7f5b46;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes seal {
+        from {
+          opacity: 0;
+          transform: rotate(-12deg) scale(0.9);
+        }
+        to {
+          opacity: 0.65;
+          transform: none;
+        }
+      }
+      @keyframes halo {
+        from {
+          transform: rotate(-20deg);
+        }
+        to {
+          transform: rotate(30deg);
+        }
+      }
+      @media (hover: hover) {
+        .choice:hover,
+        .pill:hover,
+        .cta:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: 0 7px 16px #502a2333;
+        }
+      }
+      @media (max-width: 660px) {
+        .hero {
+          padding-block: 42px 48px;
+        }
+        .hero svg {
+          right: 0;
+          top: 12px;
+          opacity: 0.3;
+          animation: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          transform: none;
+        }
+        .skip:not(:focus) {
+          transform: translateY(-180%);
+        }
+      }
+      #bootStatus {
+        position: fixed;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: #29231f;
+        color: #fff8ed;
+        z-index: 9;
+        box-shadow: 0 5px 20px #0003;
+      }
+      #bootStatus[hidden] {
+        display: none;
+      }
+      .save-warning {
+        padding: 12px;
+        border: 1px solid #92432e;
+        border-radius: 10px;
+        background: #fff0d8;
+        color: #602b1a;
+      }
+      button,
+      input,
+      select {
+        min-height: 44px;
+      }
+      dialog {
+        max-height: 90vh;
+        overflow: auto;
+      }
+      #voiceStatus:empty {
+        margin: 0;
+      }
+      #summary {
+        line-height: 1.7;
+      }
+      #confirm {
+        min-height: 50px;
+      }
+      @media (max-width: 660px) {
+        .card {
+          border-radius: 16px;
+        }
+        .hero {
+          padding-block: 28px 34px;
+        }
+        .hero h1 {
+          font-size: 46px;
+        }
+        aside .card {
+          position: static;
+        }
+        .choice {
+          padding: 15px;
+        }
+        .row button {
+          flex: 1 1 130px;
+        }
+      }
+      select,
+      input[type="date"],
+      input[type="time"] {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #c7b5a3;
+        border-radius: 12px;
+        background: #fffdf8;
+        color: #29231f;
+        font: inherit;
+        margin-top: 8px;
+      }
+      label {
+        font-weight: 650;
+      }
+      #staff .choice {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+      }
+      #staff small {
+        flex-basis: 100%;
+      }
+      .light {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 1px solid #0003;
+        margin-right: 7px;
+      }
+      .green {
+        background: #21854b;
+        box-shadow: 0 0 9px #21854b60;
+      }
+      .yellow {
+        background: #e6b421;
+        box-shadow: 0 0 9px #e6b42170;
+      }
+      .red {
+        background: #cf4034;
+        box-shadow: 0 0 9px #cf403460;
+      }
+      .off {
+        background: #666;
+        box-shadow: none;
+      }
+      #timeFeedback {
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .hero h1 {
+        font-size: clamp(38px, 6vw, 64px);
+      }
+      .hero {
+        padding: 30px 0;
+      }
+      .card h2 {
+        font-size: 27px;
+      }
+      #days {
+        margin-top: 12px;
+      }
+      #summary {
+        white-space: pre-line;
+      }
+      /* v18: textos extensos não devem alargar cartões ou colunas no celular. */
+      .layout > *,
+      .layout > div,
+      .card,
+      .row > * {
+        min-width: 0;
+      }
+      .row,
+      #summary,
+      #notice,
+      #chatInfo,
+      #chatFeedback,
+      #rescheduleFeedback {
+        overflow-wrap: anywhere;
+      }
+      .choice,
+      .pill,
+      .cta {
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+      select {
+        max-width: 100%;
+      }
+      /* v27: seleção e controles distinguíveis no modo de alto contraste. */
+      @media (forced-colors: active) {
+        .choice[aria-pressed="true"],
+        .pill[aria-pressed="true"] {
+          outline: 3px solid Highlight;
+          outline-offset: -4px;
+          border-color: Highlight;
+        }
+        .choice,
+        .pill,
+        .cta {
+          border: 1px solid ButtonText;
+        }
+        .cta:disabled {
+          color: GrayText;
+          border-color: GrayText;
+          opacity: 1;
+        }
+        .light {
+          border: 2px solid CanvasText;
+        }
+      }
 
-const dateKey=d=>new Date(+d-d.getTimezoneOffset()*min).toISOString().slice(0,10);
-const today=()=>dateKey(new Date()), at=(day,clock)=>+new Date(day+'T'+clock), clock=t=>new Date(t).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-const label=t=>new Date(t).toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
-const money=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const overlap=(a,b,c,d)=>a<d&&c<b;
-let service=0,barber=0,day=today(),slot=0;
-const profile=(i=barber)=>state.staff[shop.id==='central'?staff[i]:shop.id+':'+staff[i]]??={};
-const inShop=r=>(r.shopId||'central')===shop.id;
-$('shop').onchange=()=>{shop=shops.find(x=>x.id===$('shop').value);staff=shop.staff;barber=0;slot=0;$('notice').textContent='';render()};
-function pauseEnd(p,now){let lunch=at(today(),'13:00');return Math.max(p.pause||0,now>=at(today(),'12:00')&&now<lunch&&p.skip!==today()?lunch:0)}
-function status(i){const p=profile(i),now=Date.now(),end=pauseEnd(p,now);if(p.active)return 'Atendendo';if(p.absent)return 'Ausente';if(end>now)return 'Ocupado · Intervalo até '+clock(end);return 'Disponível'}
-function conflicts(a,b,exclude,professional=staff[barber]){
- return state.bookings.some(r=>r!==exclude&&inShop(r)&&r.barber===professional&&
-  ['confirmed','active'].includes(r.status)&&overlap(a,b,r.start,r.end));
-}
-function free(t,date=day,duration=services[service][1]*min,index=barber,exclude){
- if(!Number.isFinite(t)||!Number.isFinite(duration)||duration<=0||!Number.isInteger(index)||index<0||index>=staff.length)return false;
- if(typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(at(date,'09:00'))||dateKey(new Date(at(date,'09:00')))!==date)return false;
- const end=t+duration,p=profile(index),now=Date.now();
- return !state.shopClosed?.[shop.id]&&!p.absent&&t>now&&t>=at(date,'09:00')&&end<=at(date,'18:00')&&
-  (p.skip===date||!overlap(t,end,at(date,'12:00'),at(date,'13:00')))&&
-  t>=(p.pause||0)&&(!p.active||t>=Math.max(p.active.until,now+15*min))&&
-  !conflicts(t,end,exclude,staff[index]);
-}
-const bookingStatus={confirmed:'Confirmada',active:'Em atendimento',done:'Finalizada',cancelled:'Cancelada'};
-const rescheduleLeadTime=4*60*min;
-const canReschedule=r=>canChange(r)&&r.start-Date.now()>=rescheduleLeadTime;
-const rescheduleRule='Remarcação permitida com pelo menos 4 horas de antecedência do atendimento.';
-const canChange=r=>r.status==='confirmed'&&r.start>Date.now()&&inShop(r);
-function button(parent,title,detail,selected,action,kind='choice'){const b=document.createElement('button');b.type='button';b.className=kind;b.textContent=title;if(detail){const s=document.createElement('small');s.textContent=detail;b.append(s)}if(selected!==null)b.setAttribute('aria-pressed',selected);b.onclick=()=>{action();if(b.hasAttribute('aria-pressed'))$(parent).querySelector('[aria-pressed=true]')?.focus()};$(parent).append(b);return b}
-function nextAvailable(){
- const duration=services[service][1]*min;
- for(let offset=0;offset<7;offset++){
-  const date=new Date();date.setDate(date.getDate()+offset);
-  const key=dateKey(date);
-  for(let time=at(key,'09:00');time<at(key,'18:00');time+=15*min){
-   if(free(time,key,duration,barber))return {day:key,time};
-  }
- }
- return null;
-}
-function chooseNextAvailable(){
- if(state.shopClosed?.[shop.id]){$('notice').textContent='Esta barbearia está fechada para novas reservas. Escolha outra barbearia ou aguarde a reabertura.';$('notice').focus();return}
- const next=nextAvailable();
- if(!next){$('notice').textContent='Não há horário livre com '+staff[barber]+' em '+shop.name+' nos próximos 7 dias. Escolha outro barbeiro ou outra barbearia para consultar mais opções.';$('notice').focus();return}
- day=next.day;slot=next.time;$('preferredTime').value=new Date(slot).toTimeString().slice(0,5);render();
- $('notice').textContent='Próximo horário com '+staff[barber]+': '+label(slot)+' às '+clock(slot)+'.';
- $('slots').querySelector('[aria-pressed=true]')?.focus();
-}
-function shopAvailability(){
- if(state.shopClosed?.[shop.id])return {color:'off',text:'Fechada'};
- if(staff.some((name,i)=>status(i)==='Disponível'))return {color:'green',text:'Aberta · Há barbeiro disponível'};
- return {color:'yellow',text:'Aberta · Todos ocupados ou ausentes'};
-}
-function renderShopStatus(){
- const availability=shopAvailability(),container=$('shopStatus');
- const text=shop.name+' · '+availability.text;
- if(container.dataset.value!==text){
-  container.replaceChildren();
-  const light=document.createElement('span');light.className='light '+availability.color;light.setAttribute('aria-hidden','true');
-  container.append(light,document.createTextNode(text));container.dataset.value=text;
- }
- $('shopOpen').textContent=(state.shopClosed?.[shop.id]?'Abrir ':'Fechar ')+shop.name;
-}
-$('shopOpen').onclick=()=>{
- state.shopClosed??={};
- state.shopClosed[shop.id]=!state.shopClosed[shop.id];
- save(shop.name+(state.shopClosed[shop.id]?' fechada para novas reservas.':' aberta para reservas.'));
-};
-// v15: o campo de horário é a fonte da seleção; vazio/inválido nunca mantém reserva anterior.
-function requestedSlot(){
- const date=$('bookingDate');
- if(!date.value||!date.validity.valid||date.value!==day)return 0;
- const input=$('preferredTime'),value=input.value;
- if(!input.validity.valid||!/^([01]\d|2[0-3]):[0-5]\d$/.test(value))return 0;
- const time=at(day,value);
- return Number.isFinite(time)?time:0;
-}
-function render(){
- renderShopStatus();
+      [hidden] {
+        display: none !important;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .brand img {
+        width: 36px;
+        height: 36px;
+      }
+      .intro {
+        padding-block: clamp(38px, 8vw, 96px);
+        background: radial-gradient(ellipse at 84% 20%, #6b3b2a, transparent 62%), #211b18;
+        color: #fff4e6;
+      }
+      .intro-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(170px, 300px);
+        gap: 32px;
+        align-items: center;
+      }
+      .intro h1 {
+        line-height: 1.04;
+      }
+      .intro p {
+        max-width: 48ch;
+      }
+      .intro-mark {
+        width: min(100%, 240px);
+        justify-self: center;
+        filter: drop-shadow(0 18px 30px #0007);
+      }
+      .intro .pill {
+        background: #fff6e9;
+        color: #33251e;
+      }
+      @media (max-width: 640px) {
+        .intro-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .intro-mark {
+          grid-row: 1;
+          justify-self: start;
+          width: 82px;
+        }
+        nav {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" id="skipContent" href="#home">Ir para o conteúdo principal</a>
+    <header>
+      <nav class="wrap">
+        <div class="brand">
+          <img
+            src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23241b17%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23fff2df%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23ffc198%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+            width="36"
+            height="36"
+            alt=""
+          />
+          <div>Fio<span>Nexo</span></div>
+        </div>
+        <div class="chips" id="agendaControls" hidden>
+          <button type="button" class="pill" id="backHome">Início</button
+          ><button
+            type="button"
+            class="pill"
+            id="voice"
+            aria-label="Navegar por voz"
+            aria-describedby="voiceHelp"
+            aria-pressed="false"
+          >
+            🎙 Voz</button
+          ><button class="pill" id="toggle" aria-controls="panel" aria-expanded="false">
+            Painel do barbeiro
+          </button>
+        </div>
+      </nav>
+    </header>
+    <main id="home" class="intro" tabindex="-1" aria-labelledby="homeTitle">
+      <div class="wrap intro-grid">
+        <div>
+          <h1 id="homeTitle" tabindex="-1">Seu próximo corte começa aqui.</h1>
+          <p>
+            O FioNexo reúne barbearias da comunidade. Veja quem está disponível, escolha seu
+            barbeiro e marque o melhor horário para você.
+          </p>
+          <div class="chips">
+            <button type="button" class="cta" id="guestEntry">Entrar como convidado</button>
+            <button
+              type="button"
+              class="pill"
+              id="accountEntry"
+              aria-controls="accountInfo"
+              aria-expanded="false"
+            >
+              Criar conta
+            </button>
+          </div>
+          <p id="accountInfo" hidden>
+            O cadastro ainda está em preparação. Por enquanto, entre como convidado para testar a
+            agenda.
+          </p>
+        </div>
+        <img
+          class="intro-mark"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23241b17%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23fff2df%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23ffc198%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+          width="240"
+          height="240"
+          alt=""
+        />
+      </div>
+    </main>
+    <main class="wrap" id="mainContent" tabindex="-1" hidden aria-labelledby="agendaTitle">
+      <h1 id="agendaTitle" tabindex="-1">Agende seu horário</h1>
+      <p id="voiceHelp" hidden>
+        Diga: barbearias, serviços, barbeiros, data, horários, minhas reservas ou painel do
+        barbeiro.
+      </p>
+      <p id="voiceStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+      <section class="card" style="margin-top: 24px">
+        <label for="shop"><strong>Escolha a barbearia</strong></label
+        ><select
+          id="shop"
+          style="
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px;
+            border-radius: 10px;
+            font: inherit;
+          "
+        ></select>
+        <p id="shopStatus" role="status" aria-live="polite"></p>
+        <small class="muted">Barbearias de exemplo</small>
+        <p class="muted">
+          Demonstração ao vivo · barbearias e atendimentos fictícios. Reservas de teste duram apenas
+          nesta aba.
+        </p>
+      </section>
+      <div class="layout" id="client">
+        <div>
+          <section class="card">
+            <div class="eyebrow">01 · Serviço</div>
+            <h2>O que vamos fazer?</h2>
+            <div class="grid" id="services" role="group" aria-label="Serviços disponíveis"></div>
+          </section>
+          <section class="card">
+            <div class="eyebrow">02 · Profissional</div>
+            <h2>Escolha seu barbeiro</h2>
+            <label>Escolha seu barbeiro<select id="professional"></select></label>
+            <div
+              class="grid"
+              id="staff"
+              role="group"
+              aria-label="Barbeiros da barbearia selecionada"
+            ></div>
+          </section>
+          <section class="card">
+            <div class="eyebrow">03 · Data e horário</div>
+            <h2>Quando você prefere?</h2>
+            <label>Escolha a data<input type="date" id="bookingDate" required /></label>
+            <div class="chips" id="days" role="group" aria-label="Sugestões de datas"></div>
+            <label
+              >Qual horário você prefere?<input
+                type="time"
+                id="preferredTime"
+                aria-describedby="timeHelp timeFeedback"
+                step="60"
+            /></label>
+            <p id="timeHelp" class="muted">
+              Digite o horário que prefere ou toque em uma sugestão. Os horários disponíveis
+              consideram o serviço, o barbeiro e a data escolhidos.
+            </p>
+            <p id="timeFeedback" role="status"></p>
+            <p class="muted">Sugestões disponíveis mais próximas</p>
+            <div
+              class="chips"
+              id="slots"
+              role="group"
+              aria-label="Horários disponíveis e continuação da reserva"
+            ></div>
+          </section>
+        </div>
+        <aside>
+          <form class="card" id="reserve">
+            <div class="tag">Sua reserva</div>
+            <h2>Resumo</h2>
+            <div id="summary" aria-live="polite" aria-atomic="true"></div>
+            <hr />
+            <label
+              >Seu nome<input id="customer" required maxlength="60" autocomplete="name" /></label
+            ><button class="cta" id="confirm">Confirmar reserva</button>
+            <p><small>Demonstração local · sem cobrança</small></p>
+          </form>
+          <section class="card">
+            <h2>Minhas reservas</h2>
+            <div id="myBookings"></div>
+          </section>
+        </aside>
+      </div>
+      <section class="card" id="panel" hidden>
+        <div class="eyebrow">Área do profissional</div>
+        <h2>Painel do barbeiro</h2>
+        <div class="grid" id="panelStaff"></div>
+        <p class="badge" id="status" role="status" aria-live="polite" aria-atomic="true"></p>
+        <button class="cta" id="cut"></button> <button class="pill" id="pause"></button>
+        <button class="pill" id="presence"></button><button class="pill" id="shopOpen"></button>
+        <h3>Reservas</h3>
+        <div id="list"></div>
+      </section>
+      <p id="notice" role="status" tabindex="-1"></p>
+      <dialog
+        id="chat"
+        aria-labelledby="chatTitle"
+        aria-describedby="chatInfo"
+        style="
+          width: min(92vw, 460px);
+          border: 1px solid #cfbfb0;
+          border-radius: 20px;
+          padding: 22px;
+        "
+      >
+        <button type="button" class="pill" id="closeChat">Fechar</button>
+        <h2 id="chatTitle">Chat da reserva</h2>
+        <p id="chatInfo"></p>
+        <ul
+          id="messages"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          aria-label="Histórico da conversa"
+          tabindex="0"
+          style="max-height: 35vh; overflow: auto; overflow-wrap: anywhere"
+        ></ul>
+        <section id="quickReplies" hidden aria-labelledby="quickTitle">
+          <p id="quickTitle"><strong>Respostas rápidas</strong></p>
+          <div class="chips" id="replyButtons"></div>
+        </section>
+        <form id="sendMessage">
+          <label
+            >Mensagem<input
+              id="messageText"
+              aria-describedby="messageHelp chatFeedback"
+              required
+              maxlength="500"
+          /></label>
+          <p id="messageHelp">Escreva até 500 caracteres. Revise a mensagem e toque em Enviar.</p>
+          <button class="cta">Enviar</button>
+        </form>
+        <p id="chatFeedback" role="status"></p>
+        <small>Conversa de demonstração neste navegador.</small>
+      </dialog>
+      <dialog
+        id="reschedule"
+        aria-labelledby="rescheduleTitle"
+        aria-describedby="rescheduleContext"
+        style="
+          width: min(92vw, 460px);
+          border: 1px solid #cfbfb0;
+          border-radius: 20px;
+          padding: 22px;
+        "
+      >
+        <h2 id="rescheduleTitle">Remarcar reserva</h2>
+        <p id="rescheduleContext"></p>
+        <form id="rescheduleForm">
+          <label
+            >Nova data<input
+              type="date"
+              id="rescheduleDay"
+              aria-describedby="rescheduleFeedback"
+              required
+          /></label>
+          <p>
+            <label
+              >Novo horário
+              <select id="rescheduleSlot" aria-describedby="rescheduleFeedback" required></select
+            ></label>
+          </p>
+          <p id="rescheduleFeedback" role="status"></p>
+          <button class="cta" id="rescheduleConfirm">Confirmar novo horário</button>
+          <button type="button" class="pill" id="closeReschedule">Voltar</button>
+        </form>
+      </dialog>
+    </main>
+    <div id="bootStatus" role="status" aria-live="polite">Preparando sua agenda…</div>
+    <noscript
+      ><style>
+        #bootStatus {
+          display: none;
+        }
+      </style>
+      <div class="wrap">
+        <p class="save-warning" role="alert">
+          A agenda precisa de JavaScript para funcionar. Ative o JavaScript nas configurações do
+          navegador e recarregue esta página para consultar horários e reservar. Nenhuma reserva
+          pode ser confirmada com o JavaScript desativado.
+        </p>
+      </div></noscript
+    >
+    <script>
+      const $ = (id) => document.getElementById(id),
+        min = 60000;
+      function showAgenda(open) {
+        $("home").hidden = open;
+        $("mainContent").hidden = !open;
+        $("agendaControls").hidden = !open;
+        $("skipContent").href = open ? "#mainContent" : "#home";
+        $(open ? "agendaTitle" : "homeTitle").focus();
+      }
+      $("guestEntry").onclick = () => {
+        showAgenda(true);
+        render();
+      };
+      $("backHome").onclick = () => showAgenda(false);
+      $("accountEntry").onclick = () => {
+        const info = $("accountInfo"),
+          open = info.hidden;
+        info.hidden = !open;
+        $("accountEntry").setAttribute("aria-expanded", String(open));
+        if (open) {
+          info.tabIndex = -1;
+          info.focus();
+        }
+      };
 
- for(const id of ['services','staff','panelStaff','days','slots','list'])$(id).replaceChildren();
- services.forEach(([name,length,price],i)=>button('services',name,length+' min · '+money(price),i===service,()=>{service=i;slot=0;render()}));
- $('professional').replaceChildren();
- staff.forEach((name,i)=>$('professional').add(new Option(name+' — '+status(i),i)));
- $('professional').value=barber;
- for(const id of ['staff','panelStaff'])staff.forEach((name,i)=>{
-  const b=button(id,name,status(i),i===barber,()=>{barber=i;slot=0;render()});
-  const p=profile(i),light=document.createElement('span');
-  light.className='light '+(p.active?'yellow':p.absent?'off':pauseEnd(p,Date.now())>Date.now()?'red':'green');
-  light.setAttribute('aria-hidden','true');b.prepend(light);
- });
- $('bookingDate').value=day;$('bookingDate').min=today();
+      const services = [
+        ["Corte clássico", 30, 50],
+        ["Barba", 30, 35],
+        ["Corte e barba", 45, 75],
+      ];
+      const shops = [
+        { id: "central", name: "Barbearia Central", staff: ["Rafael", "Lucas"] },
+        { id: "bairro", name: "Corte do Bairro", staff: ["André", "Marcos"] },
+        {
+          id: "vila",
+          name: "Navalha da Vila",
+          staff: ["Bruno", "Diego", "Felipe", "Gabriel", "Igor", "João", "Leandro", "Mateus"],
+        },
+        {
+          id: "estacao",
+          name: "Barbearia Estação 9",
+          staff: [
+            "Alan",
+            "Caio",
+            "Daniel",
+            "Eduardo",
+            "Gustavo",
+            "Henrique",
+            "Murilo",
+            "Renan",
+            "Vítor",
+          ],
+        },
+        {
+          id: "orla",
+          name: "Estúdio Navalha da Orla",
+          staff: [
+            "Arthur",
+            "Breno",
+            "César",
+            "Davi",
+            "Enzo",
+            "Fábio",
+            "Heitor",
+            "Jonas",
+            "Nicolas",
+            "Thiago",
+          ],
+        },
+      ];
+      let shop = shops[0],
+        staff = shop.staff;
+      for (const entry of shops) $("shop").add(new Option(entry.name, entry.id));
+      const state = { bookings: [], staff: {}, shopClosed: {} };
+      let demoBookingSequence = 0;
+      function createBookingId() {
+        return globalThis.crypto?.randomUUID?.() ?? "demo-" + ++demoBookingSequence;
+      }
 
- for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()+i);const key=dateKey(d);button('days',i===0?'Hoje':label(d),null,key===day,()=>{day=key;slot=0;render()},'pill')}
- button('days','Próximo horário livre',null,null,chooseNextAvailable,'pill');
- if(slot&&!free(slot))slot=0;
- const desired=requestedSlot();
- const available=[];
- for(let t=at(day,'09:00');t<at(day,'18:00');t+=15*min)if(free(t))available.push(t);
- if(desired&&free(desired)&&!available.includes(desired))available.push(desired);
- available.sort((a,b)=>desired?Math.abs(a-desired)-Math.abs(b-desired)||a-b:a-b);
- slot=desired&&free(desired)?desired:0;
- const timeFeedback=desired?(slot?'Horário disponível. Confira o resumo e confirme.':'Este horário não está livre. Escolha uma sugestão abaixo.'):'Digite um horário ou escolha uma sugestão.';;
- if($('timeFeedback').textContent!==timeFeedback)$('timeFeedback').textContent=timeFeedback;
- for(const t of available.slice(0,8))button('slots',clock(t),null,t===slot,()=>{
-  $('preferredTime').value=new Date(t).toTimeString().slice(0,5);slot=t;render();
- },'pill');
+      const dateKey = (d) => new Date(+d - d.getTimezoneOffset() * min).toISOString().slice(0, 10);
+      const today = () => dateKey(new Date()),
+        at = (day, clock) => +new Date(day + "T" + clock),
+        clock = (t) =>
+          new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      const label = (t) =>
+        new Date(t).toLocaleDateString("pt-BR", {
+          weekday: "short",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      const money = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      const overlap = (a, b, c, d) => a < d && c < b;
+      let service = 0,
+        barber = 0,
+        day = today(),
+        slot = 0;
+      const staffKey = (entry, name) => (entry.id === "central" ? name : entry.id + ":" + name);
+      const profile = (i = barber) => (state.staff[staffKey(shop, staff[i])] ??= {});
+      const inShop = (r) => (r.shopId || "central") === shop.id;
+      $("shop").onchange = () => {
+        shop = shops.find((x) => x.id === $("shop").value);
+        staff = shop.staff;
+        barber = 0;
+        slot = 0;
+        $("notice").textContent = "";
+        render();
+      };
+      function pauseEnd(p, now) {
+        let lunch = at(today(), "13:00");
+        return Math.max(
+          p.pause || 0,
+          now >= at(today(), "12:00") && now < lunch && p.skip !== today() ? lunch : 0,
+        );
+      }
+      function profileStatus(p, now = Date.now()) {
+        if (p.active)
+          return p.demoServing
+            ? "Atendendo · Cliente fictício até " + clock(p.active.until)
+            : "Atendendo";
+        if (p.absent) return p.demoDayOff ? "De folga" : "Ausente";
+        const end = pauseEnd(p, now);
+        return end > now ? "Ocupado · Intervalo até " + clock(end) : "Disponível";
+      }
+      function conflicts(a, b, exclude, professional = staff[barber]) {
+        return state.bookings.some(
+          (r) =>
+            r !== exclude &&
+            inShop(r) &&
+            r.barber === professional &&
+            ["confirmed", "active"].includes(r.status) &&
+            overlap(a, b, r.start, r.end),
+        );
+      }
+      function free(t, date = day, duration = services[service][1] * min, index = barber, exclude) {
+        if (
+          !Number.isFinite(t) ||
+          !Number.isFinite(duration) ||
+          duration <= 0 ||
+          !Number.isInteger(index) ||
+          index < 0 ||
+          index >= staff.length
+        )
+          return false;
+        if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+        const opening = at(date, "09:00");
+        if (!Number.isFinite(opening) || dateKey(new Date(opening)) !== date) return false;
+        const end = t + duration,
+          p = profile(index),
+          now = Date.now();
+        return (
+          !state.shopClosed?.[shop.id] &&
+          !p.absent &&
+          t > now &&
+          t >= opening &&
+          end <= at(date, "18:00") &&
+          (p.skip === date || !overlap(t, end, at(date, "12:00"), at(date, "13:00"))) &&
+          t >= (p.pause || 0) &&
+          (!p.active || t >= Math.max(p.active.until, now + 15 * min)) &&
+          !conflicts(t, end, exclude, staff[index])
+        );
+      }
+      const bookingStatus = {
+        confirmed: "Confirmada",
+        active: "Em atendimento",
+        done: "Finalizada",
+        cancelled: "Cancelada",
+      };
+      const rescheduleLeadTime = 4 * 60 * min;
+      const canReschedule = (r) => canChange(r) && r.start - Date.now() >= rescheduleLeadTime;
+      const rescheduleRule =
+        "Remarcação permitida com pelo menos 4 horas de antecedência do atendimento.";
+      const canChange = (r) => r.status === "confirmed" && r.start > Date.now() && inShop(r);
+      function button(parent, title, detail, selected, action, kind = "choice") {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = kind;
+        b.textContent = title;
+        if (detail) {
+          const s = document.createElement("small");
+          s.textContent = detail;
+          b.append(s);
+        }
+        if (selected !== null) b.setAttribute("aria-pressed", selected);
+        b.onclick = () => {
+          action();
+          if (b.hasAttribute("aria-pressed"))
+            $(parent).querySelector("[aria-pressed=true]")?.focus();
+        };
+        $(parent).append(b);
+        return b;
+      }
+      function nextAvailable() {
+        const duration = services[service][1] * min;
+        for (let offset = 0; offset < 7; offset++) {
+          const date = new Date();
+          date.setDate(date.getDate() + offset);
+          const key = dateKey(date);
+          const latestStart = at(key, "18:00") - duration;
+          for (let time = at(key, "09:00"); time <= latestStart; time += 15 * min) {
+            if (free(time, key, duration, barber)) return { day: key, time };
+          }
+        }
+        return null;
+      }
+      function chooseNextAvailable() {
+        if (state.shopClosed?.[shop.id]) {
+          $("notice").textContent =
+            "Esta barbearia está fechada para novas reservas. Escolha outra barbearia ou aguarde a reabertura.";
+          $("notice").focus();
+          return;
+        }
+        if (profile().absent) {
+          $("notice").textContent =
+            staff[barber] +
+            " está indisponível para reservas. Escolha outro barbeiro para ver os horários.";
+          $("notice").focus();
+          return;
+        }
+        const next = nextAvailable();
+        if (!next) {
+          $("notice").textContent =
+            "Não há horário livre com " +
+            staff[barber] +
+            " em " +
+            shop.name +
+            " nos próximos 7 dias. Escolha outro barbeiro ou outra barbearia para consultar mais opções.";
+          $("notice").focus();
+          return;
+        }
+        day = next.day;
+        $("bookingDate").value = day;
+        slot = next.time;
+        $("preferredTime").value = new Date(slot).toTimeString().slice(0, 5);
+        render();
+        $("notice").textContent =
+          "Próximo horário com " + staff[barber] + ": " + label(slot) + " às " + clock(slot) + ".";
+        $("slots").querySelector("[aria-pressed=true]")?.focus();
+      }
+      function shopAvailability(entry) {
+        if (state.shopClosed?.[entry.id]) return { color: "off", text: "Fechada" };
+        if (
+          entry.staff.some(
+            (name) => profileStatus(state.staff[staffKey(entry, name)] || {}) === "Disponível",
+          )
+        )
+          return { color: "green", text: "Aberta · Há barbeiro disponível" };
+        return { color: "yellow", text: "Aberta · Todos ocupados ou ausentes" };
+      }
+      function renderShopStatus() {
+        const availability = shopAvailability(shop),
+          container = $("shopStatus");
+        const dots = { green: "🟢", yellow: "🟡", off: "⚫" };
+        for (const option of $("shop").options) {
+          const entry = shops.find((item) => item.id === option.value);
+          const { color, text } = entry === shop ? availability : shopAvailability(entry);
+          const label = dots[color] + " " + entry.name + " — " + text;
+          if (option.text !== label) option.text = label;
+        }
+        const text = shop.name + " · " + availability.text;
+        if (container.dataset.value !== text) {
+          container.replaceChildren();
+          const light = document.createElement("span");
+          light.className = "light " + availability.color;
+          light.setAttribute("aria-hidden", "true");
+          container.append(light, document.createTextNode(text));
+          container.dataset.value = text;
+        }
+        $("shopOpen").textContent =
+          (state.shopClosed?.[shop.id] ? "Abrir " : "Fechar ") + shop.name;
+      }
+      $("shopOpen").onclick = () => {
+        state.shopClosed ??= {};
+        state.shopClosed[shop.id] = !state.shopClosed[shop.id];
+        save(
+          shop.name +
+            (state.shopClosed[shop.id]
+              ? " fechada para novas reservas."
+              : " aberta para reservas."),
+        );
+      };
+      // v15: o campo de horário é a fonte da seleção; vazio/inválido nunca mantém reserva anterior.
+      function requestedSlot() {
+        const date = $("bookingDate");
+        if (!date.value || !date.validity.valid || date.value !== day) return 0;
+        const input = $("preferredTime"),
+          value = input.value;
+        if (!input.validity.valid || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return 0;
+        const time = at(day, value);
+        return Number.isFinite(time) ? time : 0;
+      }
+      function render() {
+        renderShopStatus();
 
- if(!$('slots').children.length)$('slots').textContent=state.shopClosed?.[shop.id]?'Esta barbearia está fechada para novas reservas. Escolha outra barbearia ou consulte novamente quando ela reabrir.':'Sem horários livres nesta data. Escolha outro dia.';
- const [name,length,price]=services[service];
- const summaryText=name+' · '+length+' min\n'+money(price)+'\n'+shop.name+' · '+staff[barber]+'\n'+(slot?label(slot)+' às '+clock(slot)+' · Término previsto: '+clock(slot+length*min):'Escolha um horário');;
- if($('summary').textContent!==summaryText)$('summary').textContent=summaryText;
- $('confirm').disabled=!slot;
- if(slot)button('slots','Continuar reserva',null,null,()=>{
-  $('customer').focus();
-  $('customer').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});
- },'cta');
- const p=profile();
- $('presence').textContent=p.absent?'Voltar ao trabalho':'Ficar ausente';$('presence').disabled=!!p.active;
- const statusText=shop.name+' · '+staff[barber]+' · '+status(barber);
- if($('status').textContent!==statusText)$('status').textContent=statusText;$('cut').textContent=p.active?'Finalizar atendimento':'Atender agora';
- $('pause').textContent=pauseEnd(p,Date.now())>Date.now()?'Encerrar intervalo':'Pausar por 30 min';$('pause').disabled=!!p.active;
- for(const id of ['presence','pause','cut'])$(id).setAttribute('aria-label',$(id).textContent+' · '+staff[barber]+' · '+shop.name);
- const bookings=state.bookings.filter(r=>inShop(r)&&r.barber===staff[barber]).sort((a,b)=>a.start-b.start);
- if(!bookings.length)$('list').textContent='Nenhuma reserva para '+staff[barber]+' em '+shop.name+'.';
- bookings.forEach(r=>{const row=document.createElement('div');row.className='row';row.textContent=label(r.start)+' · '+clock(r.start)+' até '+clock(r.end)+' · '+r.customer+' · '+bookingStatus[r.status];$('list').append(row);if(r.status==='confirmed'){const b=button('list','Iniciar atendimento',null,null,()=>start(r),'pill');b.disabled=!!p.active;b.setAttribute('aria-label','Iniciar atendimento de '+r.customer+' com '+r.barber+' em '+shop.name+' no dia '+label(r.start)+' às '+clock(r.start));row.append(b)}row.append(chatButton(r,'barber'))});
- $('myBookings').replaceChildren();
- const mine=state.bookings.filter(inShop).sort((a,b)=>a.start-b.start);
- if(!mine.length)$('myBookings').textContent='Você ainda não tem reservas nesta barbearia.';
- for(const r of mine){
-   const row=document.createElement('div');row.className='row';
-   row.textContent=r.barber+' · '+label(r.start)+' às '+clock(r.start)+' até '+clock(r.end)+' · '+bookingStatus[r.status];
-   $('myBookings').append(row);
-   row.append(chatButton(r,'customer'));
-   if(canChange(r)){
-     const context=' com '+r.barber+' em '+shop.name+' no dia '+label(r.start)+' às '+clock(r.start);
-     const move=button('myBookings','Remarcar',null,null,()=>openReschedule(r),'pill');
-     move.setAttribute('aria-label','Remarcar reserva'+context);move.disabled=!canReschedule(r);row.append(move);
-     const rule=document.createElement('small');rule.textContent=canReschedule(r)?rescheduleRule:'Prazo de remarcação encerrado. É necessário remarcar com pelo menos 4 horas de antecedência.';row.append(rule);
-     const cancel=button('myBookings','Cancelar reserva',null,null,()=>cancelBooking(r),'pill');
-     cancel.setAttribute('aria-label','Cancelar reserva'+context);row.append(cancel);
-   }
- }
-}
-$('professional').onchange=()=>{barber=Number($('professional').value);slot=0;render()};
-$('bookingDate').onchange=()=>{
- const input=$('bookingDate');
- if(!input.value||!input.validity.valid){
-  slot=0;$('confirm').disabled=true;$('slots').replaceChildren();
-  $('summary').textContent='Escolha uma data válida para continuar a reserva.';
-  $('timeFeedback').textContent='Preencha uma data a partir de hoje.';
-  return;
- }
- day=input.value;slot=0;render();
-};
-$('bookingDate').oninput=$('bookingDate').onchange;
-$('preferredTime').oninput=()=>{slot=0;render()};
-$('presence').onclick=()=>{const p=profile();if(p.active)return;p.absent=!p.absent;save(p.absent?'Profissional ausente.':'Profissional disponível.')};
-let bookingToMove;
-function cancelBooking(r){
- if(!canChange(r)||!window.confirm('Cancelar sua reserva em '+shop.name+' com '+r.barber+' no dia '+label(r.start)+' às '+clock(r.start)+'?'))return;
- r.status='cancelled';
- save('Reserva cancelada. O horário voltou para a agenda.');
-}
-function openReschedule(r){
- if(!canReschedule(r)){ $('notice').textContent=rescheduleRule;$('notice').focus();return; }
- bookingToMove=r;
- $('rescheduleContext').textContent='Reserva atual: '+shop.name+' · '+r.barber+' · '+label(r.start)+' às '+clock(r.start)+'. Escolha abaixo a nova data e o novo horário. '+rescheduleRule;
- const input=$('rescheduleDay');
- const lastDay=new Date();
- lastDay.setDate(lastDay.getDate()+6);
- input.min=today();
- input.max=dateKey(lastDay);
- const originalDay=dateKey(new Date(r.start));
- input.value=originalDay<=input.max?originalDay:input.min;
- renderRescheduleSlots();
- $('reschedule').showModal();
- input.focus();
-}
-function renderRescheduleSlots(){
- const r=bookingToMove,input=$('rescheduleDay'),select=$('rescheduleSlot');
- const date=input.value,index=staff.indexOf(r.barber),previous=select.value;
- select.replaceChildren();
- if(input.validity.valid&&index>=0&&canReschedule(r)){
-   for(let t=at(date,'09:00');t<at(date,'18:00');t+=15*min){
-     if(t!==r.start&&free(t,date,r.end-r.start,index,r))select.add(new Option(clock(t)+' até '+clock(t+r.end-r.start),t));
-   }
- }
- if(Array.from(select.options).some(option=>option.value===previous))select.value=previous;
- const empty=!select.options.length;
- if(empty)select.add(new Option('Sem horários disponíveis',''));
- $('rescheduleConfirm').disabled=empty;
- $('rescheduleFeedback').textContent=empty?(!input.value||!input.validity.valid?'Preencha uma data válida no período permitido. Sua reserva atual foi mantida.':state.shopClosed?.[shop.id]?'Esta barbearia está fechada para novas reservas e remarcações. Sua reserva atual foi mantida. Consulte novamente quando ela reabrir.':'Escolha outra data para ver mais horários. Sua reserva atual foi mantida.'):'';
-}
-$('rescheduleDay').onchange=renderRescheduleSlots;
-$('rescheduleDay').oninput=renderRescheduleSlots;
-$('closeReschedule').onclick=()=>$('reschedule').close();
-$('reschedule').onclose=()=>{bookingToMove=undefined};
-$('rescheduleForm').onsubmit=e=>{
- e.preventDefault();
- const r=bookingToMove,input=$('rescheduleDay'),t=Number($('rescheduleSlot').value);
- if(!r)return;
- const index=staff.indexOf(r.barber),duration=r.end-r.start;
- if(!canReschedule(r)){
-   renderRescheduleSlots();$('rescheduleFeedback').textContent='Prazo de remarcação encerrado. '+rescheduleRule;return;
- }
- if(index<0||!input.validity.valid||!t||t===r.start||!free(t,input.value,duration,index,r)){
-   renderRescheduleSlots();
-   $('rescheduleFeedback').textContent='Este horário não está disponível. Confira a data e tente outro horário.';
-   return;
- }
- r.start=t;
- r.end=t+duration;
- $('reschedule').close();
- save('Reserva remarcada em '+shop.name+' com '+r.barber+' para '+label(t)+' às '+clock(t)+'.');
-};
-let conversation;
-const quickReplies=[
- ['Confirmar horário','Olá! Seu horário está confirmado. Até logo!'],
- ['Avisar atraso','Olá! Estou com um pequeno atraso. Obrigado pela paciência.'],
- ['Já pode vir','Olá! Já estou pronto para te atender. Pode vir!'],
- ['Remarcar','Olá! Podemos combinar outro horário? Qual fica melhor para você?'],
- ['Agradecer','Obrigado pela visita! Até a próxima.']
-];
-for(const [title,message] of quickReplies){
- button('replyButtons',title,null,null,()=>{
-   if(conversation?.role!=='barber'||!chatOpen(conversation.reservation))return;
-   const input=$('messageText');
-   if(input.value.trim()&&input.value!==message&&!window.confirm('Substituir a mensagem em edição por esta resposta rápida?')){input.focus();return}
-   input.value=message;
-   input.focus();$('chatFeedback').textContent='Resposta preenchida. Revise e toque em Enviar.';
- },'pill');
-}
-const chatOpen=reservation=>reservation.status==='confirmed';
-function chatButton(reservation,role){
- const btn=document.createElement('button');btn.type='button';btn.className='pill';btn.textContent=chatOpen(reservation)?'Abrir chat':'Ver histórico';btn.setAttribute('aria-label',btn.textContent+' da reserva de '+(role==='barber'?reservation.customer:reservation.barber)+' em '+label(reservation.start)+' às '+clock(reservation.start));
- btn.onclick=()=>{conversation={reservation,role};$('quickReplies').hidden=role!=='barber'||!chatOpen(reservation);$('sendMessage').hidden=!chatOpen(reservation);$('chatInfo').textContent=shop.name+' · '+reservation.barber+' · '+label(reservation.start)+' às '+clock(reservation.start);$('messageText').value='';$('chatFeedback').textContent=chatOpen(reservation)?'':'Chat encerrado. O histórico fica disponível para consulta.';$('chat').showModal();renderChat();$('closeChat').focus()};
- return btn;
-}
-function renderChat(){
- // v16: preserve mensagens existentes para anunciar apenas as novas no leitor de tela.
- const list=$('messages'),messages=conversation.reservation.messages||[];
- const texts=messages.map(m=>(m.role==='barber'?conversation.reservation.barber:conversation.reservation.customer)+': '+m.text);
- if(!texts.length)texts.push('Nenhuma mensagem ainda.');
- if(list.dataset.reservation!==conversation.reservation.id||list.children.length>texts.length||
-    Array.from(list.children).some((item,i)=>item.textContent!==texts[i]))list.replaceChildren();
- list.dataset.reservation=conversation.reservation.id;
- for(let i=list.children.length;i<texts.length;i++){
-   const item=document.createElement('li');item.textContent=texts[i];list.append(item);
- }
- list.scrollTop=list.scrollHeight;
-}
-function canCloseChat(){
- return !$('messageText').value.trim()||window.confirm('Há uma mensagem não enviada. Fechar o chat e descartar esse texto?');
-}
-$('closeChat').onclick=()=>{if(canCloseChat())$('chat').close();else $('messageText').focus()};
-$('chat').oncancel=e=>{if(!canCloseChat()){e.preventDefault();$('messageText').focus()}};
-$('sendMessage').onsubmit=e=>{
- e.preventDefault();const text=$('messageText').value.trim();
- if(!conversation||!chatOpen(conversation.reservation))return;
- if(!text){$('chatFeedback').textContent='Digite uma mensagem antes de enviar. Espaços sozinhos não são uma mensagem.';$('messageText').focus();return;}
- (conversation.reservation.messages??=[]).push({role:conversation.role,text});
- const saved=persistState();$('messageText').value='';renderChat();$('messageText').focus();$('chatFeedback').textContent=saved?'Mensagem enviada.':'Não foi possível salvar. A mensagem está somente no histórico desta aba. Copie o texto antes de fechar ou recarregar a página.';
-};
-function save(msg){const saved=persistState();render();if(saved)$('notice').textContent=msg;else showStorageProblem();$('notice').focus()}
-function start(r){
- const p=profile(),now=Date.now();
- if(p.active)return;
- if(p.absent){$('notice').textContent=staff[barber]+' está ausente. Toque em Voltar ao trabalho antes de iniciar um atendimento.';$('notice').focus();return}
- if(r){
-  if(!inShop(r)||r.barber!==staff[barber]||r.status!=='confirmed')return;
-  if(r.start>now&&!window.confirm('A reserva de '+r.customer+' com '+r.barber+' em '+shop.name+' é para '+label(r.start)+' às '+clock(r.start)+'. O cliente já chegou e você quer iniciar agora?'))return;
- }
- const end=now+(r?r.end-r.start:30*min);
- if(conflicts(now,end,r)&&!window.confirm('Este atendimento pode cruzar uma reserva. Continuar?'))return;
- if(r)r.status='active';
- p.active={id:r?.id,until:end};
- save('Atendimento iniciado.');
-}
-$('customer').oninput=()=>$('customer').setCustomValidity('');
-$('reserve').onsubmit=e=>{e.preventDefault();slot=requestedSlot();const customer=$('customer').value.trim();if(!customer){const input=$('customer');input.setCustomValidity('Digite seu nome. Espaços sozinhos não são um nome.');input.reportValidity();input.focus();return}if(!slot||!free(slot)){render();$('notice').textContent='Escolha um horário livre para confirmar sua reserva.';$('notice').focus();return}state.bookings.push({id:crypto.randomUUID(),shopId:shop.id,barber:staff[barber],customer,start:slot,end:slot+services[service][1]*min,status:'confirmed'});const msg='Reserva confirmada em '+shop.name+' com '+staff[barber]+' no dia '+label(slot)+' às '+clock(slot)+'.';slot=0;$('preferredTime').value='';e.target.reset();save(msg)};
-$('cut').onclick=()=>{const p=profile();if(!p.active)return start();const r=state.bookings.find(r=>r.id===p.active.id);if(r)r.status='done';delete p.active;save('Atendimento finalizado.')};
-$('pause').onclick=()=>{const p=profile(),now=Date.now();if(p.active)return;if(pauseEnd(p,now)>now){p.pause=0;if(now>=at(today(),'12:00')&&now<at(today(),'13:00'))p.skip=today();return save('Intervalo encerrado.')}if(conflicts(now,now+30*min)&&!window.confirm('A pausa coincide com uma reserva. Continuar?'))return;p.pause=now+30*min;save('Intervalo iniciado.')};
-$('toggle').onclick=()=>{const show=$('panel').hidden;$('panel').hidden=!show;$('toggle').setAttribute('aria-expanded',String(show));$('client').style.display=show?'none':'';$('toggle').textContent=show?'Voltar ao agendamento':'Painel do barbeiro';$('notice').textContent='';render();const heading=$(show?'panel':'client').querySelector('h2');heading.tabIndex=-1;heading.focus()};
-const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-let listening;
-function voiceNotice(message){
- $('voiceStatus').textContent=message;
-}
-function voiceNavigate(text){
- const command=text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.!?]/g,'').trim();
- const destinations={barbearias:'shop',servicos:'services',barbeiros:'staff',horarios:'days','minhas reservas':'myBookings','painel do barbeiro':'panel'};
- const target=Object.hasOwn(destinations,command)?destinations[command]:null;
- if(!target){voiceNotice('Comando não reconhecido. '+$('voiceHelp').textContent);return}
- if(target!=='shop' && $('panel').hidden===(target==='panel'))$('toggle').click();
- const area=$(target);
- const focus=area.matches('select')?area:area.querySelector('button:not(:disabled)')||area;
- if(focus===area&&!area.matches('select'))area.tabIndex=-1;
- focus.focus();
- voiceNotice('Aberto: '+text+'.');
-}
-$('voice').onclick=()=>{
- if(listening){listening.abort();voiceNotice('Microfone desativado.');return}
- if(!Recognition){voiceNotice('Este navegador não oferece comandos de voz. Use os botões ou o teclado.');return}
- const recognition=new Recognition();
- recognition.lang='pt-BR';
- recognition.interimResults=false;
- recognition.onresult=e=>voiceNavigate(e.results[0][0].transcript);
- recognition.onerror=e=>{if(e.error!=='aborted')voiceNotice(e.error==='not-allowed'?'Microfone sem permissão. Use os botões ou o teclado.':'Não foi possível ouvir o comando. Tente novamente ou use os botões.')};
- recognition.onend=()=>{listening=null;$('voice').setAttribute('aria-pressed','false');$('voice').textContent='🎙 Voz'};
- try{
-   recognition.start();listening=recognition;
-   $('voice').setAttribute('aria-pressed','true');$('voice').textContent='Parar voz';
-   voiceNotice('Escutando. '+$('voiceHelp').textContent);
- }catch{voiceNotice('Não foi possível ativar o microfone. Use os botões ou o teclado.')}
-};
-try{
- render();
- $('bootStatus').hidden=true;
- if(storageProblem)showStorageProblem();
-}catch{
- $('bootStatus').textContent='Não foi possível preparar a agenda. Recarregue a página para tentar novamente.';
-}
-</script></html>
+        for (const id of ["services", "staff", "panelStaff", "days", "slots", "list"])
+          $(id).replaceChildren();
+        services.forEach(([name, length, price], i) =>
+          button("services", name, length + " min · " + money(price), i === service, () => {
+            service = i;
+            slot = 0;
+            render();
+          }),
+        );
+        const staffStatusTime = Date.now();
+        const staffStatuses = staff.map((_, i) => profileStatus(profile(i), staffStatusTime));
+        $("professional").replaceChildren();
+        staff.forEach((name, i) =>
+          $("professional").add(new Option(name + " — " + staffStatuses[i], i)),
+        );
+        $("professional").value = barber;
+        for (const id of ["staff", "panelStaff"])
+          staff.forEach((name, i) => {
+            const b = button(id, name, staffStatuses[i], i === barber, () => {
+              barber = i;
+              slot = 0;
+              render();
+            });
+            const p = profile(i),
+              light = document.createElement("span");
+            light.className =
+              "light " +
+              (p.active
+                ? "yellow"
+                : p.absent
+                  ? "off"
+                  : pauseEnd(p, staffStatusTime) > staffStatusTime
+                    ? "red"
+                    : "green");
+            light.setAttribute("aria-hidden", "true");
+            b.prepend(light);
+          });
+        const dateInput = $("bookingDate");
+        dateInput.min = today();
+        const validDate = !!dateInput.value && dateInput.validity.valid;
+
+        for (let i = 0; i < 7; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() + i);
+          const key = dateKey(d);
+          button(
+            "days",
+            i === 0 ? "Hoje" : label(d),
+            null,
+            validDate && key === day,
+            () => {
+              day = key;
+              dateInput.value = day;
+              slot = 0;
+              render();
+            },
+            "pill",
+          );
+        }
+        button("days", "Próximo horário livre", null, null, chooseNextAvailable, "pill");
+        const desired = requestedSlot();
+        slot = desired && free(desired) ? desired : 0;
+        const [name, length, price] = services[service];
+        const available = [];
+        const latestStart = validDate ? at(day, "18:00") - length * min : NaN;
+        if (validDate)
+          for (let t = at(day, "09:00"); t <= latestStart; t += 15 * min) {
+            if (t === desired ? slot === desired : free(t)) available.push(t);
+          }
+        if (slot && !available.includes(slot)) available.push(slot);
+        available.sort((a, b) =>
+          desired ? Math.abs(a - desired) - Math.abs(b - desired) || a - b : a - b,
+        );
+        let timeFeedback = "Digite um horário ou escolha uma sugestão.";
+        if (!validDate) timeFeedback = "Escolha uma data a partir de hoje para ver os horários.";
+        else if (state.shopClosed?.[shop.id])
+          timeFeedback = "Esta barbearia está fechada. Escolha outra barbearia.";
+        else if (profile().absent)
+          timeFeedback =
+            staff[barber] + " está indisponível para reservas. Escolha outro barbeiro.";
+        else if (!available.length)
+          timeFeedback =
+            "Sem horários livres com " +
+            staff[barber] +
+            " nesta data. Escolha outro dia ou barbeiro.";
+        else if (desired)
+          timeFeedback = slot
+            ? "Horário disponível. Confira o resumo e confirme."
+            : "Este horário não está livre. Escolha uma sugestão abaixo.";
+        if ($("timeFeedback").textContent !== timeFeedback)
+          $("timeFeedback").textContent = timeFeedback;
+        for (const t of available.slice(0, 8)) {
+          const option = button(
+            "slots",
+            clock(t),
+            null,
+            t === slot,
+            () => {
+              $("preferredTime").value = new Date(t).toTimeString().slice(0, 5);
+              slot = t;
+              render();
+            },
+            "pill",
+          );
+          option.setAttribute("aria-label", clock(t) + " até " + clock(t + length * min));
+        }
+        const summaryText =
+          name +
+          " · " +
+          length +
+          " min\n" +
+          money(price) +
+          "\n" +
+          shop.name +
+          " · " +
+          staff[barber] +
+          "\n" +
+          (slot
+            ? label(slot) +
+              " às " +
+              clock(slot) +
+              " · Término previsto: " +
+              clock(slot + length * min)
+            : validDate
+              ? "Escolha um horário"
+              : "Escolha uma data válida");
+        if ($("summary").textContent !== summaryText) $("summary").textContent = summaryText;
+        $("confirm").disabled = !slot;
+        if (slot)
+          button(
+            "slots",
+            "Continuar reserva",
+            null,
+            null,
+            () => {
+              $("customer").focus();
+              $("customer").scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                  ? "instant"
+                  : "smooth",
+                block: "center",
+              });
+            },
+            "cta",
+          );
+        const p = profile();
+        $("cut").disabled = !!p.absent && !p.active;
+        $("presence").textContent = p.absent ? "Voltar ao trabalho" : "Ficar ausente";
+        $("presence").disabled = !!p.active;
+        const statusText = shop.name + " · " + staff[barber] + " · " + staffStatuses[barber];
+        if ($("status").textContent !== statusText) $("status").textContent = statusText;
+        $("cut").textContent = p.active ? "Finalizar atendimento" : "Atender agora";
+        $("pause").textContent =
+          pauseEnd(p, staffStatusTime) > staffStatusTime
+            ? "Encerrar intervalo"
+            : "Pausar por 30 min";
+        $("pause").disabled = !!p.active;
+        for (const id of ["presence", "pause", "cut"])
+          $(id).setAttribute(
+            "aria-label",
+            $(id).textContent + " · " + staff[barber] + " · " + shop.name,
+          );
+        const bookings = state.bookings
+          .filter((r) => inShop(r) && r.barber === staff[barber])
+          .sort((a, b) => a.start - b.start);
+        if (!bookings.length)
+          $("list").textContent =
+            "Nenhuma reserva para " + staff[barber] + " em " + shop.name + ".";
+        bookings.forEach((r) => {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.textContent =
+            (r.serviceName ? r.serviceName + " · " : "") +
+            label(r.start) +
+            " · " +
+            clock(r.start) +
+            " até " +
+            clock(r.end) +
+            " · " +
+            r.customer +
+            " · " +
+            bookingStatus[r.status];
+          $("list").append(row);
+          if (r.status === "confirmed") {
+            const b = button("list", "Iniciar atendimento", null, null, () => start(r), "pill");
+            b.disabled = !!p.active || !!p.absent;
+            b.setAttribute(
+              "aria-label",
+              "Iniciar atendimento de " +
+                r.customer +
+                " com " +
+                r.barber +
+                " em " +
+                shop.name +
+                " no dia " +
+                label(r.start) +
+                " às " +
+                clock(r.start),
+            );
+            row.append(b);
+          }
+          row.append(chatButton(r, "barber"));
+        });
+        $("myBookings").replaceChildren();
+        const mine = state.bookings.filter(inShop).sort((a, b) => a.start - b.start);
+        if (!mine.length)
+          $("myBookings").textContent = "Você ainda não tem reservas nesta barbearia.";
+        for (const r of mine) {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.textContent =
+            r.barber +
+            " · " +
+            (r.serviceName ? r.serviceName + " · " : "") +
+            label(r.start) +
+            " às " +
+            clock(r.start) +
+            " até " +
+            clock(r.end) +
+            " · " +
+            bookingStatus[r.status];
+          $("myBookings").append(row);
+          row.append(chatButton(r, "customer"));
+          if (canChange(r)) {
+            const context =
+              " com " +
+              r.barber +
+              " em " +
+              shop.name +
+              " no dia " +
+              label(r.start) +
+              " às " +
+              clock(r.start);
+            const move = button(
+              "myBookings",
+              "Remarcar",
+              null,
+              null,
+              () => openReschedule(r),
+              "pill",
+            );
+            const eligible = canReschedule(r);
+            const rule = document.createElement("small");
+            rule.id = "reschedule-rule-" + r.id;
+            rule.textContent = eligible
+              ? rescheduleRule
+              : "Prazo de remarcação encerrado. É necessário remarcar com pelo menos 4 horas de antecedência.";
+            move.setAttribute("aria-label", "Remarcar reserva" + context);
+            move.setAttribute("aria-describedby", rule.id);
+            move.disabled = !eligible;
+            row.append(move, rule);
+            const cancel = button(
+              "myBookings",
+              "Cancelar reserva",
+              null,
+              null,
+              () => cancelBooking(r),
+              "pill",
+            );
+            cancel.setAttribute("aria-label", "Cancelar reserva" + context);
+            row.append(cancel);
+          }
+        }
+      }
+      $("professional").onchange = () => {
+        barber = Number($("professional").value);
+        slot = 0;
+        render();
+      };
+      $("bookingDate").onchange = () => {
+        const input = $("bookingDate");
+        if (input.value && input.validity.valid) day = input.value;
+        slot = 0;
+        render();
+      };
+      $("bookingDate").oninput = $("bookingDate").onchange;
+      $("preferredTime").oninput = () => {
+        slot = 0;
+        render();
+      };
+      $("presence").onclick = () => {
+        const p = profile();
+        if (p.active) return;
+        p.absent = !p.absent;
+        delete p.demoDayOff;
+        save(
+          staff[barber] +
+            (p.absent ? " está ausente em " : " voltou ao trabalho em ") +
+            shop.name +
+            ".",
+        );
+      };
+      let bookingToMove;
+      function cancelBooking(r) {
+        if (
+          !canChange(r) ||
+          !window.confirm(
+            "Cancelar sua reserva em " +
+              shop.name +
+              " com " +
+              r.barber +
+              " no dia " +
+              label(r.start) +
+              " às " +
+              clock(r.start) +
+              "?",
+          )
+        )
+          return;
+        r.status = "cancelled";
+        save(
+          "Reserva cancelada em " +
+            shop.name +
+            " com " +
+            r.barber +
+            " no dia " +
+            label(r.start) +
+            " às " +
+            clock(r.start) +
+            ".",
+        );
+      }
+      function openReschedule(r) {
+        if (!canReschedule(r)) {
+          $("notice").textContent = rescheduleRule;
+          $("notice").focus();
+          return;
+        }
+        bookingToMove = r;
+        const bookedService = r.serviceName ? r.serviceName + " · " : "";
+        $("rescheduleContext").textContent =
+          "Reserva atual: " +
+          shop.name +
+          " · " +
+          r.barber +
+          " · " +
+          bookedService +
+          label(r.start) +
+          " das " +
+          clock(r.start) +
+          " às " +
+          clock(r.end) +
+          ". Escolha a nova data e o novo horário. " +
+          rescheduleRule;
+        const input = $("rescheduleDay");
+        const lastDay = new Date();
+        lastDay.setDate(lastDay.getDate() + 6);
+        input.min = today();
+        input.max = dateKey(lastDay);
+        const originalDay = dateKey(new Date(r.start));
+        input.value = originalDay <= input.max ? originalDay : input.min;
+        $("rescheduleSlot").value = "";
+        renderRescheduleSlots();
+        $("reschedule").showModal();
+        input.focus();
+      }
+      const expiredRescheduleText = "Prazo de remarcação encerrado. " + rescheduleRule;
+      function renderRescheduleSlots() {
+        const r = bookingToMove,
+          input = $("rescheduleDay"),
+          select = $("rescheduleSlot");
+        const eligible = canReschedule(r);
+        const date = input.value,
+          index = staff.indexOf(r.barber),
+          previous = select.value;
+        select.replaceChildren();
+        if (input.validity.valid && index >= 0 && eligible) {
+          const duration = r.end - r.start;
+          const latestStart = at(date, "18:00") - duration;
+          for (let t = at(date, "09:00"); t <= latestStart; t += 15 * min) {
+            if (t !== r.start && free(t, date, duration, index, r))
+              select.add(new Option(clock(t) + " até " + clock(t + duration), t));
+          }
+        }
+        const empty = !select.options.length;
+        select.add(new Option(empty ? "Sem horários disponíveis" : "Selecione um horário", ""), 0);
+        select.value = Array.from(select.options).some((option) => option.value === previous)
+          ? previous
+          : "";
+        select.disabled = empty;
+        $("rescheduleConfirm").disabled = empty;
+        const feedbackText = empty
+          ? !eligible
+            ? expiredRescheduleText
+            : !input.value || !input.validity.valid
+              ? "Preencha uma data válida no período permitido. Sua reserva atual foi mantida."
+              : state.shopClosed?.[shop.id]
+                ? "Esta barbearia está fechada para novas reservas e remarcações. Sua reserva atual foi mantida. Consulte novamente quando ela reabrir."
+                : "Escolha outra data para ver mais horários. Sua reserva atual foi mantida."
+          : "";
+        const feedback = $("rescheduleFeedback");
+        if (feedback.textContent !== feedbackText) feedback.textContent = feedbackText;
+      }
+      $("rescheduleDay").onchange = renderRescheduleSlots;
+      $("rescheduleDay").oninput = renderRescheduleSlots;
+      $("closeReschedule").onclick = () => $("reschedule").close();
+      $("reschedule").onclose = () => {
+        bookingToMove = undefined;
+      };
+      $("rescheduleForm").onsubmit = (e) => {
+        e.preventDefault();
+        const r = bookingToMove,
+          input = $("rescheduleDay"),
+          t = Number($("rescheduleSlot").value);
+        if (!r) return;
+        const index = staff.indexOf(r.barber),
+          duration = r.end - r.start;
+        if (!canReschedule(r)) {
+          renderRescheduleSlots();
+          return;
+        }
+        if (
+          index < 0 ||
+          !input.validity.valid ||
+          !t ||
+          t === r.start ||
+          !free(t, input.value, duration, index, r)
+        ) {
+          renderRescheduleSlots();
+          $("rescheduleFeedback").textContent =
+            "Este horário não está disponível. Confira a data e escolha outro horário. Sua reserva atual foi mantida.";
+          return;
+        }
+        r.start = t;
+        r.end = t + duration;
+        $("reschedule").close();
+        save(
+          "Reserva remarcada em " +
+            shop.name +
+            " com " +
+            r.barber +
+            " para " +
+            label(t) +
+            " às " +
+            clock(t) +
+            ".",
+        );
+      };
+      let conversation;
+      const quickReplies = [
+        ["Confirmar horário", "Olá! Seu horário está confirmado. Até logo!"],
+        ["Avisar atraso", "Olá! Estou com um pequeno atraso. Obrigado pela paciência."],
+        ["Já pode vir", "Olá! Já estou pronto para te atender. Pode vir!"],
+        ["Remarcar", "Olá! Podemos combinar outro horário? Qual fica melhor para você?"],
+        ["Agradecer", "Obrigado pela visita! Até a próxima."],
+      ];
+      for (const [title, message] of quickReplies) {
+        button(
+          "replyButtons",
+          title,
+          null,
+          null,
+          () => {
+            if (conversation?.role !== "barber" || !chatOpen(conversation.reservation)) return;
+            const input = $("messageText");
+            if (
+              input.value.trim() &&
+              input.value !== message &&
+              !window.confirm("Substituir a mensagem em edição por esta resposta rápida?")
+            ) {
+              input.focus();
+              return;
+            }
+            input.value = message;
+            input.focus();
+            $("chatFeedback").textContent = "Resposta preenchida. Revise e toque em Enviar.";
+          },
+          "pill",
+        );
+      }
+      const chatOpen = (reservation) => reservation.status === "confirmed";
+      const pendingDemoReplies = new WeakMap();
+      function scheduleDemoReply(reservation, text) {
+        if (!chatOpen(reservation)) return;
+        clearTimeout(pendingDemoReplies.get(reservation));
+        const timer = setTimeout(
+          () => {
+            pendingDemoReplies.delete(reservation);
+            if (!chatOpen(reservation) || reservation.start <= Date.now()) return;
+            (reservation.messages ??= []).push({ role: "barber", automated: true, text });
+            if ($("chat").open && conversation?.reservation === reservation) renderChat();
+          },
+          2500 + Math.random() * 5000,
+        );
+        pendingDemoReplies.set(reservation, timer);
+      }
+      function prepareDemo(now = Date.now()) {
+        for (const [shopIndex, entry] of shops.entries()) {
+          state.shopClosed[entry.id] = shopIndex === shops.length - 1;
+          for (const [i, name] of entry.staff.entries()) {
+            const p = (state.staff[staffKey(entry, name)] = {
+              demoNext: now + (2 + (i % 4)) * min,
+            });
+            if (i === 1) p.pause = now + (1 + shopIndex) * min;
+            if (i === 2) {
+              p.active = { until: now + 3 * min };
+              p.demoServing = true;
+            }
+            if (i === 3) {
+              p.absent = true;
+              p.demoDayOff = true;
+            }
+          }
+        }
+      }
+      function advanceDemo(now = Date.now()) {
+        let changed = false;
+        for (const entry of shops) {
+          for (const name of entry.staff) {
+            const p = state.staff[staffKey(entry, name)];
+            if (p.demoServing && p.active?.until <= now) {
+              delete p.active;
+              delete p.demoServing;
+              p.demoNext = now + min;
+              changed = true;
+            }
+            if (p.pause && p.pause <= now) {
+              delete p.pause;
+              p.demoNext = now + min;
+              changed = true;
+            }
+            if (
+              state.shopClosed[entry.id] ||
+              p.absent ||
+              p.active ||
+              pauseEnd(p, now) > now ||
+              p.demoNext > now
+            )
+              continue;
+            const end = now + (2 + Math.floor(Math.random() * 4)) * min;
+            const reserved = state.bookings.some(
+              (r) =>
+                (r.shopId || "central") === entry.id &&
+                r.barber === name &&
+                ["confirmed", "active"].includes(r.status) &&
+                overlap(now, end, r.start, r.end),
+            );
+            if (reserved) continue;
+            p.active = { until: end };
+            p.demoServing = true;
+            changed = true;
+          }
+        }
+        return changed;
+      }
+      let demoRefreshPending = false,
+        shopStatusPending = false,
+        lastDemoMinute;
+      function refreshDemo() {
+        const now = Date.now(),
+          currentMinute = Math.floor(now / min);
+        if (advanceDemo(now) || currentMinute !== lastDemoMinute) {
+          demoRefreshPending = true;
+          shopStatusPending = true;
+        }
+        lastDemoMinute = currentMinute;
+        if (
+          $("reschedule").open &&
+          bookingToMove &&
+          !canReschedule(bookingToMove) &&
+          $("rescheduleFeedback").textContent !== expiredRescheduleText
+        ) {
+          const focused = document.activeElement;
+          const focusWouldBeLost =
+            focused === $("rescheduleSlot") || focused === $("rescheduleConfirm");
+          renderRescheduleSlots();
+          if (focusWouldBeLost) $("closeReschedule").focus();
+        }
+
+        if (!demoRefreshPending || $("mainContent").hidden) return;
+        const focused = document.activeElement;
+        if (focused?.matches("#shop,#professional,#bookingDate,#preferredTime")) return;
+        if (
+          $("chat").open ||
+          $("reschedule").open ||
+          focused?.matches(
+            "#staff button,#panelStaff button,#services button,#days button,#slots button,#myBookings button,#list button",
+          )
+        ) {
+          if (shopStatusPending) {
+            renderShopStatus();
+            shopStatusPending = false;
+          }
+          return;
+        }
+        render();
+        demoRefreshPending = false;
+        shopStatusPending = false;
+      }
+      function chatButton(reservation, role) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pill";
+        btn.textContent = chatOpen(reservation) ? "Abrir chat" : "Ver histórico";
+        btn.setAttribute(
+          "aria-label",
+          btn.textContent +
+            " da reserva de " +
+            (role === "barber" ? reservation.customer : reservation.barber) +
+            " em " +
+            label(reservation.start) +
+            " às " +
+            clock(reservation.start),
+        );
+        btn.onclick = () => {
+          conversation = { reservation, role };
+          $("quickReplies").hidden = role !== "barber" || !chatOpen(reservation);
+          $("sendMessage").hidden = !chatOpen(reservation);
+          $("chatInfo").textContent =
+            shop.name +
+            " · " +
+            reservation.barber +
+            " · " +
+            label(reservation.start) +
+            " às " +
+            clock(reservation.start);
+          $("messageText").value = "";
+          $("chatFeedback").textContent = chatOpen(reservation)
+            ? ""
+            : "Chat encerrado. O histórico fica disponível para consulta.";
+          $("chat").showModal();
+          renderChat(true);
+          $("closeChat").focus();
+        };
+        return btn;
+      }
+      function renderChat(showLatest = false) {
+        // v16: preserve mensagens existentes para anunciar apenas as novas no leitor de tela.
+        const list = $("messages"),
+          messages = conversation.reservation.messages || [];
+        const nearBottom = list.scrollHeight - list.clientHeight - list.scrollTop <= 24;
+        const texts = messages.map(
+          (m) =>
+            (m.role === "barber"
+              ? conversation.reservation.barber +
+                (m.automated ? " (resposta automática de teste)" : "")
+              : conversation.reservation.customer) +
+            ": " +
+            m.text,
+        );
+        if (!texts.length) texts.push("Nenhuma mensagem ainda.");
+        if (
+          list.dataset.reservation !== conversation.reservation.id ||
+          list.children.length > texts.length ||
+          Array.from(list.children).some((item, i) => item.textContent !== texts[i])
+        )
+          list.replaceChildren();
+        list.dataset.reservation = conversation.reservation.id;
+        for (let i = list.children.length; i < texts.length; i++) {
+          const item = document.createElement("li");
+          item.textContent = texts[i];
+          list.append(item);
+        }
+        if (showLatest || nearBottom) list.scrollTop = list.scrollHeight;
+      }
+      function canCloseChat() {
+        return (
+          !$("messageText").value.trim() ||
+          window.confirm("Há uma mensagem não enviada. Fechar o chat e descartar esse texto?")
+        );
+      }
+      $("closeChat").onclick = () => {
+        if (canCloseChat()) $("chat").close();
+        else $("messageText").focus();
+      };
+      $("chat").oncancel = (e) => {
+        if (!canCloseChat()) {
+          e.preventDefault();
+          $("messageText").focus();
+        }
+      };
+      $("sendMessage").onsubmit = (e) => {
+        e.preventDefault();
+        const text = $("messageText").value.trim();
+        if (!conversation || !chatOpen(conversation.reservation)) return;
+        if (!text) {
+          $("chatFeedback").textContent =
+            "Digite uma mensagem antes de enviar. Espaços sozinhos não são uma mensagem.";
+          $("messageText").focus();
+          return;
+        }
+        (conversation.reservation.messages ??= []).push({ role: conversation.role, text });
+        if (conversation.role === "customer") {
+          const r = conversation.reservation;
+          scheduleDemoReply(
+            r,
+            "Olá! Recebi sua mensagem. Seu horário está reservado para " +
+              label(r.start) +
+              " às " +
+              clock(r.start) +
+              ". Até lá!",
+          );
+        }
+        $("messageText").value = "";
+        renderChat(true);
+        $("messageText").focus();
+        $("chatFeedback").textContent = "Mensagem enviada na demonstração.";
+      };
+      function save(msg) {
+        render();
+        $("notice").textContent = msg;
+        $("notice").focus();
+      }
+      function start(r) {
+        const p = profile(),
+          now = Date.now();
+        if (p.active) return;
+        if (p.absent) {
+          $("notice").textContent =
+            staff[barber] +
+            " está ausente. Toque em Voltar ao trabalho antes de iniciar um atendimento.";
+          $("notice").focus();
+          return;
+        }
+        if (r) {
+          if (!inShop(r) || r.barber !== staff[barber] || r.status !== "confirmed") return;
+          if (
+            r.start > now &&
+            !window.confirm(
+              "A reserva de " +
+                r.customer +
+                " com " +
+                r.barber +
+                " em " +
+                shop.name +
+                " é para " +
+                label(r.start) +
+                " às " +
+                clock(r.start) +
+                ". O cliente já chegou e você quer iniciar agora?",
+            )
+          )
+            return;
+        }
+        const end = now + (r ? r.end - r.start : 30 * min);
+        if (
+          conflicts(now, end, r) &&
+          !window.confirm("Este atendimento pode cruzar uma reserva. Continuar?")
+        )
+          return;
+        if (r) r.status = "active";
+        delete p.demoServing;
+        p.active = { id: r?.id, until: end };
+        save(
+          "Atendimento iniciado por " +
+            staff[barber] +
+            " em " +
+            shop.name +
+            ". Término previsto às " +
+            clock(end) +
+            ".",
+        );
+      }
+      $("customer").oninput = () => $("customer").setCustomValidity("");
+      $("reserve").onsubmit = (e) => {
+        e.preventDefault();
+        slot = requestedSlot();
+        const customer = $("customer").value.trim();
+        if (!customer) {
+          const input = $("customer");
+          input.setCustomValidity("Digite seu nome. Espaços sozinhos não são um nome.");
+          input.reportValidity();
+          input.focus();
+          return;
+        }
+        if (!slot || !free(slot)) {
+          render();
+          $("notice").textContent = "Escolha um horário livre para confirmar sua reserva.";
+          $("notice").focus();
+          return;
+        }
+        const reservation = {
+          id: createBookingId(),
+          shopId: shop.id,
+          barber: staff[barber],
+          customer,
+          serviceName: services[service][0],
+          start: slot,
+          end: slot + services[service][1] * min,
+          status: "confirmed",
+        };
+        state.bookings.push(reservation);
+        scheduleDemoReply(reservation, "Olá! Sua reserva está confirmada. Até o seu horário!");
+        const msg =
+          "Reserva confirmada em " +
+          shop.name +
+          " com " +
+          staff[barber] +
+          " no dia " +
+          label(slot) +
+          " às " +
+          clock(slot) +
+          ".";
+        slot = 0;
+        $("preferredTime").value = "";
+        e.target.reset();
+        save(msg);
+      };
+      $("cut").onclick = () => {
+        const p = profile();
+        if (!p.active) return start();
+        const r = state.bookings.find((r) => r.id === p.active.id);
+        if (r) r.status = "done";
+        delete p.active;
+        delete p.demoServing;
+        p.demoNext = Date.now() + min;
+        save("Atendimento finalizado.");
+      };
+      $("pause").onclick = () => {
+        const p = profile(),
+          now = Date.now();
+        if (p.active) return;
+        if (pauseEnd(p, now) > now) {
+          p.pause = 0;
+          if (now >= at(today(), "12:00") && now < at(today(), "13:00")) p.skip = today();
+          return save("Intervalo encerrado.");
+        }
+        if (
+          conflicts(now, now + 30 * min) &&
+          !window.confirm("A pausa coincide com uma reserva. Continuar?")
+        )
+          return;
+        p.pause = now + 30 * min;
+        save("Intervalo iniciado.");
+      };
+      $("toggle").onclick = () => {
+        const show = $("panel").hidden;
+        $("panel").hidden = !show;
+        $("toggle").setAttribute("aria-expanded", String(show));
+        $("client").style.display = show ? "none" : "";
+        $("toggle").textContent = show ? "Voltar ao agendamento" : "Painel do barbeiro";
+        $("notice").textContent = "";
+        render();
+        const heading = $(show ? "panel" : "client").querySelector("h2");
+        heading.tabIndex = -1;
+        heading.focus();
+      };
+      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let listening;
+      function voiceNotice(message) {
+        $("voiceStatus").textContent = message;
+      }
+      function voiceNavigate(text) {
+        const command = text
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[.!?]/g, "")
+          .trim();
+        const destinations = {
+          barbearias: "shop",
+          servicos: "services",
+          barbeiros: "staff",
+          data: "bookingDate",
+          horarios: "days",
+          "minhas reservas": "myBookings",
+          "painel do barbeiro": "panel",
+        };
+        const target = Object.hasOwn(destinations, command) ? destinations[command] : null;
+        if (!target) {
+          voiceNotice("Comando não reconhecido. " + $("voiceHelp").textContent);
+          return;
+        }
+        if (target !== "shop" && $("panel").hidden === (target === "panel")) $("toggle").click();
+        const area = $(target);
+        const isFormField = area.matches("select,input");
+        const focus = isFormField ? area : area.querySelector("button:not(:disabled)") || area;
+        if (focus === area && !isFormField) area.tabIndex = -1;
+        focus.focus();
+        voiceNotice("Aberto: " + text + ".");
+      }
+      $("voice").onclick = () => {
+        if (listening) {
+          listening.abort();
+          voiceNotice("Microfone desativado.");
+          return;
+        }
+        if (!Recognition) {
+          voiceNotice("Este navegador não oferece comandos de voz. Use os botões ou o teclado.");
+          return;
+        }
+        const recognition = new Recognition();
+        recognition.lang = "pt-BR";
+        recognition.interimResults = false;
+        recognition.onresult = (e) => voiceNavigate(e.results[0][0].transcript);
+        recognition.onerror = (e) => {
+          if (e.error !== "aborted")
+            voiceNotice(
+              e.error === "not-allowed"
+                ? "Microfone sem permissão. Use os botões ou o teclado."
+                : "Não foi possível ouvir o comando. Tente novamente ou use os botões.",
+            );
+        };
+        recognition.onend = () => {
+          listening = null;
+          $("voice").setAttribute("aria-pressed", "false");
+          $("voice").textContent = "🎙 Voz";
+        };
+        try {
+          recognition.start();
+          listening = recognition;
+          $("voice").setAttribute("aria-pressed", "true");
+          $("voice").textContent = "Parar voz";
+          voiceNotice("Escutando. " + $("voiceHelp").textContent);
+        } catch {
+          voiceNotice("Não foi possível ativar o microfone. Use os botões ou o teclado.");
+        }
+      };
+      try {
+        prepareDemo();
+        $("bookingDate").value = day;
+        render();
+        $("bootStatus").hidden = true;
+        setInterval(refreshDemo, 1000);
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) refreshDemo();
+        });
+      } catch {
+        $("bootStatus").textContent =
+          "Não foi possível preparar a agenda. Recarregue a página para tentar novamente.";
+      }
+    </script>
+  </body>
+</html>
