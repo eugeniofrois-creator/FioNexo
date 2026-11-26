@@ -3065,7 +3065,9 @@
   if (control && !control.matches("#services button, #staff button, #days button, #slots button")) return;
 
   const textBlock = control || event.target.closest(
-    "#mainContent h1, #mainContent h2, #mainContent h3, #mainContent p, #mainContent label, #summary"
+    "#mainContent h1, #mainContent h2, #mainContent h3, #mainContent p, #mainContent label, #summary, " +
+    "dialog[open] h2, dialog[open] h3, dialog[open] p, dialog[open] label, " +
+    "dialog[open] li, dialog[open] th, dialog[open] td, dialog[open] caption"
   );
   const text = (control?.getAttribute("aria-label") || textBlock?.textContent)?.trim();
   if (!text) return;
