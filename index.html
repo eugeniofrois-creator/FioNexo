@@ -928,12 +928,19 @@
     <script>
       const $ = (id) => document.getElementById(id),
         min = 60000;
-      function showAgenda(open) {
+      const guestViewKey = "fionexo:guest-view";
+      function showAgenda(open, moveFocus = true) {
+        try {
+          if (open) sessionStorage.setItem(guestViewKey, "open");
+          else sessionStorage.removeItem(guestViewKey);
+        } catch {
+          // Navigation still works when storage is blocked.
+        }
         $("home").hidden = open;
         $("mainContent").hidden = !open;
         $("agendaControls").hidden = !open;
         $("skipContent").href = open ? "#mainContent" : "#home";
-        $(open ? "agendaTitle" : "guestEntry").focus();
+        if (moveFocus) $(open ? "agendaTitle" : "guestEntry").focus();
       }
       $("guestEntry").onclick = () => {
         showAgenda(true);
@@ -2283,6 +2290,11 @@
         $("bookingDate").value = day;
         render();
         $("guestEntry").disabled = false;
+        try {
+          if (sessionStorage.getItem(guestViewKey) === "open") showAgenda(true, false);
+        } catch {
+          // Keep the welcome screen when storage is blocked.
+        }
         $("bootStatus").hidden = true;
         setInterval(refreshDemo, 1000);
         document.addEventListener("visibilitychange", () => {
