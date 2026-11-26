@@ -2274,10 +2274,18 @@
           const box = document.createElement("p"), number = document.createElement("strong");
           box.append(document.createTextNode(title)); number.textContent = value; box.append(number); metrics.append(box);
         }
-        const totals = entry.staff.map((name) => ({
-          name, total: records.filter((item) => item.barber === name).reduce((sum, item) => sum + item.price, 0),
-          count: records.filter((item) => item.barber === name).length
-        }));
+        const totalsByStaff = new Map(
+          entry.staff.map((name) => [name, { name, total: 0, count: 0 }])
+        );
+        for (const record of records) {
+          const item = totalsByStaff.get(record.barber) || { name: record.barber, total: 0, count: 0 };
+          item.total += record.price;
+          item.count += 1;
+          totalsByStaff.set(record.barber, item);
+        }
+        const totals = Array.from(totalsByStaff.values()).sort(
+          (a, b) => b.total - a.total || a.name.localeCompare(b.name, "pt-BR")
+        );
         const max = Math.max(1, ...totals.map((item) => item.total));
         $("managementChart").replaceChildren();
         for (const item of totals) {
