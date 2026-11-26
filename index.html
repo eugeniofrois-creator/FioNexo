@@ -1000,6 +1000,7 @@
         </form>
         <p id="cashFeedback" role="status"></p>
         <div id="managementResults">
+        <button type="button" class="pill" id="exportManagementDay" disabled>Baixar relatório do dia (CSV)</button>
         <div class="management-metrics" id="managementMetrics"></div>
         <h3>Total demonstrativo por profissional</h3>
         <div class="management-chart" id="managementChart"></div>
@@ -2264,6 +2265,51 @@
         persistManagement();
         if ($("management").open) renderManagement();
       }
+      function managementRecordsForDay(shopId, date) {
+        return managementData.entries.filter((item) =>
+          item.shopId === shopId && dateKey(new Date(item.end)) === date);
+      }
+      function csvRows(rows) {
+        return "\ufeff" + rows.map((row) => row.map((value) => {
+          const text = String(value ?? "").replace(/^(\s*)([=+@-])/, "$1'$2");
+          return '"' + text.replace(/"/g, '""') + '"';
+        }).join(";")).join("\r\n");
+      }
+      $("exportManagementDay").onclick = () => {
+        const entry = ownedShop(), dateInput = $("managementDate");
+        if (!entry || $("managementShop").value !== entry.id ||
+            !dateInput.value || !dateInput.validity.valid) return;
+        collectDemoCompletions(Date.now());
+        const records = managementRecordsForDay(entry.id, dateInput.value);
+        if (!records.length) {
+          $("managementFeedback").textContent = "Não há atendimentos concluídos para exportar neste dia.";
+          return;
+        }
+        const rows = [
+          ["Barbearia", "Dia", "Profissional", "Serviço", "Início (UTC)", "Fim (UTC)", "Valor do serviço",
+           "Pagamento", "Dinheiro entregue", "Troco", "Registrado por", "Origem", "Tipo"],
+          ...records.slice().sort((a, b) => a.end - b.end).map((record) => [
+            entry.name, dateInput.value, record.barber, record.serviceName,
+            new Date(record.start).toISOString(), new Date(record.end).toISOString(),
+            record.price.toFixed(2).replace(".", ","),
+            record.paymentMethod === "cash_demo" ? "Dinheiro demonstrativo" : "Pagamento demonstrativo",
+            record.paymentMethod === "cash_demo" ? (record.receivedCents / 100).toFixed(2).replace(".", ",") : "",
+            record.paymentMethod === "cash_demo" ? (record.changeCents / 100).toFixed(2).replace(".", ",") : "",
+            record.cashRecordedBy || "", record.source, "Demonstração"
+          ])
+        ];
+        const url = URL.createObjectURL(new Blob([csvRows(rows)], { type: "text/csv;charset=utf-8" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "fionexo-gestao-" + entry.id + "-" + dateInput.value + ".csv";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        $("managementFeedback").textContent = "Relatório demonstrativo preparado com " +
+          records.length + " atendimento(s). Confira o download.";
+      };
+
       function renderManagement() {
         const focusedCashRecord = document.activeElement?.dataset?.cashRecordId;
         const shopId = $("managementShop").value;
@@ -2279,8 +2325,8 @@
         if ($("managementDateFeedback").textContent !== dateMessage)
           $("managementDateFeedback").textContent = dateMessage;
         if (!validDate) return;
-        const records = managementData.entries.filter((item) =>
-          item.shopId === shopId && dateKey(new Date(item.end)) === date);
+        const records = managementRecordsForDay(shopId, date);
+        $("exportManagementDay").disabled = records.length === 0;
         const total = records.reduce((sum, item) => sum + item.price, 0);
         const pending = state.bookings.filter((r) =>
           (r.shopId || "central") === shopId && ["confirmed", "active"].includes(r.status) &&
