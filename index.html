@@ -959,7 +959,7 @@
       <dialog id="management" aria-labelledby="managementTitle" aria-describedby="managementScope">
         <button type="button" class="pill" id="closeManagement">Fechar gestão</button>
         <h2 id="managementTitle">Gestão da barbearia</h2>
-        <p id="managementScope">Valores demonstrativos. Histórico deste navegador, registrado a partir da ativação desta gestão e mantido por 7 dias. Pagamentos dependem de integração.</p>
+        <p id="managementScope">Valores demonstrativos. Histórico deste navegador, registrado a partir da ativação desta gestão e mantido por 7 dias. Ao concluir, o pagamento é simulado. Recebimentos reais dependem de integração.</p>
         <label for="managementShop">Barbearia</label>
         <select id="managementShop"></select>
         <label for="managementDate">Dia</label>
@@ -970,7 +970,7 @@
         <div class="management-table" tabindex="0" role="region" aria-label="Histórico de atendimentos">
           <table>
             <caption>Atendimentos concluídos no dia selecionado</caption>
-            <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Origem</th></tr></thead>
+            <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Pagamento</th><th scope="col">Origem</th></tr></thead>
             <tbody id="managementLog"></tbody>
           </table>
         </div>
@@ -2123,7 +2123,7 @@ $("downloadDemoAccount").onclick = () => {
       }
       function addManagementEntry(entry) {
         if (managementData.entries.some((item) => item.id === entry.id)) return;
-        managementData.entries.push(entry);
+        managementData.entries.push({ ...entry, paymentStatus: "demo_paid", paidAt: entry.end });
       }
       function collectDemoCompletions(now) {
         const from = Math.max(managementData.scanned, now - 7 * 24 * 60 * min);
@@ -2134,7 +2134,7 @@ $("downloadDemoAccount").onclick = () => {
             let end = Math.floor((from + offset - 55 * min) / cycle) * cycle - offset + 55 * min;
             for (end += cycle; end <= now; end += cycle) {
               const start = end - 50 * min;
-              if (start < managementData.since) continue;
+              if (end < managementData.since) continue;
               const reserved = state.bookings.some((r) =>
                 (r.shopId || "central") === entry.id && r.barber === name &&
                 r.status !== "cancelled" && overlap(start, end, r.start, r.end));
@@ -2168,7 +2168,7 @@ $("downloadDemoAccount").onclick = () => {
         const metrics = $("managementMetrics");
         metrics.replaceChildren();
         for (const [title, value] of [
-          ["Total demonstrativo", money(total)], ["Concluídos", String(records.length)],
+          ["Recebido · demonstração", money(total)], ["Concluídos", String(records.length)],
           ["Ticket médio", records.length ? money(total / records.length) : money(0)],
           ["Reservas pendentes", String(pending)]
         ]) {
@@ -2193,14 +2193,14 @@ $("downloadDemoAccount").onclick = () => {
         for (const record of records.slice().sort((a, b) => b.end - a.end)) {
           const row = document.createElement("tr");
           for (const value of [clock(record.start) + "–" + clock(record.end), record.barber,
-            record.serviceName, money(record.price), record.source]) {
+            record.serviceName, money(record.price), "Pago · demonstração às " + clock(record.paidAt ?? record.end), record.source]) {
             const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
           }
           $("managementLog").append(row);
         }
         if (!records.length) {
           const row = document.createElement("tr"), cell = document.createElement("td");
-          cell.colSpan = 5; cell.textContent = "Nenhum atendimento concluído registrado neste dia.";
+          cell.colSpan = 6; cell.textContent = "Nenhum atendimento concluído registrado neste dia.";
           row.append(cell); $("managementLog").append(row);
         }
       }
