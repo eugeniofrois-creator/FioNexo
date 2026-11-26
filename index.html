@@ -1275,7 +1275,7 @@
         staff = activeStaff(shop);
       for (const entry of shops) $("shop").add(new Option(entry.name, entry.id));
       for (const [i, entry] of shops.entries()) $("accountShop").add(new Option((i + 1) + ". 💈 " + entry.name, entry.id));
-      const state = { bookings: [], staff: {}, shopClosed: {} };
+      const state = { bookings: [], staff: Object.create(null), shopClosed: Object.create(null) };
       let demoBookingSequence = 0;
       function createBookingId() {
         return globalThis.crypto?.randomUUID?.() ?? "demo-" + ++demoBookingSequence;
@@ -2117,13 +2117,19 @@
         try {
           const saved = JSON.parse(sessionStorage.getItem(demoStateKey));
           if (!saved || !Array.isArray(saved.bookings)) return false;
-          for (const entry of shops) {
-            if (typeof saved.shopClosed?.[entry.id] !== "boolean") return false;
-            for (const name of entry.staff) {
-              if (!Number.isFinite(saved.staff?.[staffKey(entry, name)]?.demoNext)) return false;
-            }
+          const restoredStaff = Object.create(null);
+          for (const [key, value] of Object.entries(saved.staff || {})) {
+            if (value && typeof value === "object" && !Array.isArray(value))
+              restoredStaff[key] = value;
           }
-          Object.assign(state, saved);
+          const restoredShops = Object.create(null);
+          for (const [key, value] of Object.entries(saved.shopClosed || {})) {
+            if (typeof value === "boolean") restoredShops[key] = value;
+          }
+          state.bookings = saved.bookings;
+          state.staff = restoredStaff;
+          state.shopClosed = restoredShops;
+          // The current team is reconciled by advanceDemo after restoration.
           return true;
         } catch {
           return false;
