@@ -658,6 +658,13 @@
         }
       }
     #confirm:enabled + #confirmHelp { display: none; }
+    /* Highlight only spoken text, preserving cards, icons and controls. */
+      .spoken-text {
+        color: #102a43 !important;
+        background-color: #ffe169;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+      }
     </style>
   </head>
   <body>
@@ -1106,6 +1113,7 @@ $("downloadDemoAccount").onclick = () => {
         $("preferredTime").value = "";
         $("notice").textContent = "";
         render();
+        announceSelection("Barbearia selecionada. " + selectedOptionText($("shop")));
       };
       function pauseEnd(p, now) {
         const day = dateKey(new Date(now));
@@ -1266,7 +1274,7 @@ $("downloadDemoAccount").onclick = () => {
         for (const option of $("shop").options) {
           const entry = shops.find((item) => item.id === option.value);
           const { color, text } = entry === shop ? availability : shopAvailability(entry, now);
-          const label = dots[color] + " " + entry.name + " — " + text;
+          const label = (shops.indexOf(entry) + 1) + ". " + dots[color] + " " + entry.name + " — " + text;
           if (option.text !== label) option.text = label;
         }
         const text = shop.name + " · " + availability.text;
@@ -1307,7 +1315,7 @@ $("downloadDemoAccount").onclick = () => {
         for (const id of ["services", "staff", "panelStaff", "days", "slots", "list"])
           $(id).replaceChildren();
         services.forEach(([name, length, price], i) =>
-          button("services", name, length + " min · " + money(price), i === service, () => {
+          button("services", (i + 1) + ". " + name, length + " min · " + money(price), i === service, () => {
             service = i;
             slot = 0;
             render();
@@ -1316,7 +1324,7 @@ $("downloadDemoAccount").onclick = () => {
         const staffStatusTime = Date.now();
         const staffStatuses = staff.map((_, i) => profileStatus(profile(i), staffStatusTime));
         const professionalSelect = $("professional");
-        const professionalLabels = staff.map((name, i) => name + " — " + staffStatuses[i]);
+        const professionalLabels = staff.map((name, i) => (i + 1) + ". " + name + " — " + staffStatuses[i]);
         if (
           professionalSelect.options.length !== professionalLabels.length ||
           professionalLabels.some((label, i) => professionalSelect.options[i].text !== label)
@@ -1328,7 +1336,7 @@ $("downloadDemoAccount").onclick = () => {
         professionalSelect.value = String(barber);
         for (const id of ["staff", "panelStaff"])
           staff.forEach((name, i) => {
-            const b = button(id, name, staffStatuses[i], i === barber, () => {
+            const b = button(id, (i + 1) + ". " + name, staffStatuses[i], i === barber, () => {
               barber = i;
               slot = 0;
               render();
@@ -1622,6 +1630,7 @@ $("downloadDemoAccount").onclick = () => {
         barber = index;
         slot = 0;
         render();
+        announceSelection("Profissional selecionado. " + selectedOptionText(select));
       };
       $("bookingDate").onchange = () => {
         const input = $("bookingDate");
@@ -2261,11 +2270,43 @@ $("downloadDemoAccount").onclick = () => {
       const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       let listening;
       const audioControl = $("enableAudio");
-      function speakVoice(message, statusId = "voiceStatus") {
+      let spokenTextSpans = [];
+      let highlightedReply = null;
+
+      function clearSpokenText() {
+        for (const span of spokenTextSpans) span.replaceWith(...span.childNodes);
+        spokenTextSpans = [];
+        highlightedReply = null;
+      }
+
+      function highlightSpokenText(element, reply) {
+        clearSpokenText();
+        if (!element?.isConnected) return;
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+        while (walker.nextNode()) {
+          if (walker.currentNode.textContent.trim()) nodes.push(walker.currentNode);
+        }
+        for (const node of nodes) {
+          const span = document.createElement("span");
+          span.className = "spoken-text";
+          node.replaceWith(span);
+          span.append(node);
+          spokenTextSpans.push(span);
+        }
+        highlightedReply = reply;
+      }
+
+      function speakVoice(message, statusId = "voiceStatus", textElement = null) {
        if (audioControl.getAttribute("aria-pressed") !== "true") return;
        const reply = new window.SpeechSynthesisUtterance(message);
        reply.lang = "pt-BR";
+       reply.onstart = () => highlightSpokenText(textElement, reply);
+       reply.onend = () => {
+         if (highlightedReply === reply) clearSpokenText();
+       };
        reply.onerror = (event) => {
+         if (highlightedReply === reply) clearSpokenText();
          const status = $(statusId);
          if (event.error !== "canceled" && event.error !== "interrupted" &&
              status.textContent === message && !listening)
@@ -2281,7 +2322,8 @@ $("downloadDemoAccount").onclick = () => {
        const enabled = audioControl.getAttribute("aria-pressed") === "true";
        audioControl.setAttribute("aria-pressed", String(!enabled));
        if (enabled) {
-         window.speechSynthesis.cancel();
+         clearSpokenText();
+  window.speechSynthesis.cancel();
          voiceNotice("Leitura em voz alta desativada.");
          return;
        }
@@ -2289,18 +2331,62 @@ $("downloadDemoAccount").onclick = () => {
        voiceNotice(message);
        speakVoice(message);
       };
+      function selectedOptionText(select) {
+        return select.selectedOptions[0]?.textContent.replace(/[🟢🟡⚫]/gu, "").trim() || "";
+      }
+
+      function announceSelection(message) {
+        if (audioControl.getAttribute("aria-pressed") !== "true") return;
+        clearSpokenText();
+        window.speechSynthesis.cancel();
+        voiceNotice(message);
+        speakVoice(message);
+      }
+
+      let lastOptionsAnnouncement = { id: "", time: 0 };
+      function announceOptions(id) {
+        const now = Date.now();
+        if (lastOptionsAnnouncement.id === id && now - lastOptionsAnnouncement.time < 700) return;
+        lastOptionsAnnouncement = { id, time: now };
+        if (id === "shop") renderShopStatus();
+        const area = $(id);
+        const options = id === "services"
+          ? Array.from(area.querySelectorAll("button"), (button) => button.textContent)
+          : Array.from(area.options, (option) => option.textContent);
+        announceSelection(
+          (id === "shop" ? "Barbearias. " : id === "professional" ? "Profissionais. " : "Serviços e preços. ") +
+          options.join(". ").replace(/[🟢🟡⚫]/gu, "")
+        );
+      }
+      for (const id of ["shop", "professional"]) {
+        $(id).addEventListener("focus", () => announceOptions(id));
+        $(id).addEventListener("pointerdown", () => announceOptions(id));
+      }
+      $("services").addEventListener("focusin", (event) => {
+        if (!$("services").contains(event.relatedTarget)) announceOptions("services");
+      });
+
       document.addEventListener("click", (event) => {
   if (audioControl.getAttribute("aria-pressed") !== "true") return;
   if (!(event.target instanceof Element)) return;
-  if (event.target.closest("button, a, input, select, textarea")) return;
-  const textBlock = event.target.closest(
+
+  const control = event.target.closest("button, a, input, select, textarea");
+  if (control && !control.matches("#services button, #staff button, #days button, #slots button")) return;
+
+  const textBlock = control || event.target.closest(
     "#mainContent h1, #mainContent h2, #mainContent h3, #mainContent p, #mainContent label, #summary"
   );
-  const text = textBlock?.textContent.trim();
+  const text = (control?.getAttribute("aria-label") || textBlock?.textContent)?.trim();
   if (!text) return;
+
+  clearSpokenText();
   window.speechSynthesis.cancel();
-  speakVoice(text);
-});
+  speakVoice(
+    control?.matches("#services button, #staff button") ? "Selecionado. " + text : text,
+    "voiceStatus",
+    textBlock
+  );
+}, true);
 function voiceNotice(message) {
         $("voiceStatus").textContent = message;
       }
