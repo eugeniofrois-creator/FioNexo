@@ -803,6 +803,10 @@
             Painel do barbeiro
           </button>
         </div>
+      <div class="chips">
+          <button type="button" class="pill" id="topAccount">Criar conta</button>
+          <button type="button" class="pill" id="ownerArea">Área da barbearia</button>
+        </div>
       </nav>
     </header>
     <main id="home" class="intro" tabindex="-1" aria-labelledby="homeTitle">
@@ -826,10 +830,16 @@
             </button>
           </div>
           <form id="accountInfo" hidden>
-  <p id="demoAccountHelp">Use um apelido fictício. O perfil de teste fica neste navegador e pode ser baixado em TXT.</p>
+  <p id="demoAccountHelp">Use um apelido fictício. O perfil de teste fica neste navegador e pode ser baixado em TXT. Acesso por senha e permissões reais dependem da integração de login.</p>
+  <label for="accountType">Tipo de perfil</label>
+  <select id="accountType"><option value="client">Cliente</option><option value="owner">Barbearia</option></select>
+  <div id="ownerShopField" hidden>
+    <label for="accountShop">Sua barbearia de demonstração</label>
+    <select id="accountShop"></select>
+  </div>
   <label for="demoAccountName">Apelido de teste</label>
   <input id="demoAccountName" required maxlength="60" autocomplete="off" aria-describedby="demoAccountHelp">
-  <button type="submit" class="cta">Salvar e abrir agenda</button>
+  <button type="submit" class="cta">Salvar perfil e entrar</button>
   <button type="button" class="pill" id="downloadDemoAccount" hidden>Baixar perfil em TXT</button>
   <p id="demoAccountStatus" role="status"></p>
 </form>
@@ -964,6 +974,16 @@
         <select id="managementShop"></select>
         <label for="managementDate">Dia</label>
         <input type="date" id="managementDate" required>
+        <section aria-labelledby="teamTitle">
+          <h3 id="teamTitle">Equipe da barbearia</h3>
+          <form id="teamForm">
+            <label for="teamName">Nome do profissional</label>
+            <input id="teamName" required maxlength="60" autocomplete="off">
+            <button class="cta" type="submit">Cadastrar barbeiro</button>
+          </form>
+          <p id="teamFeedback" role="status"></p>
+          <div id="teamList"></div>
+        </section>
         <div class="management-metrics" id="managementMetrics"></div>
         <h3>Total demonstrativo por profissional</h3>
         <div class="management-chart" id="managementChart"></div>
@@ -1090,64 +1110,73 @@
         render();
       };
       $("backHome").onclick = () => showAgenda(false);
-      const demoAccountKey = "fionexo:demo-account-name";
-function readDemoAccount() {
-  try {
-    return localStorage.getItem(demoAccountKey) || "";
-  } catch {
-    return "";
-  }
-}
-$("accountEntry").onclick = () => {
-  const form = $("accountInfo");
-  const open = form.hidden;
-  form.hidden = !open;
-  $("accountEntry").setAttribute("aria-expanded", String(open));
-  if (open) {
-    const savedName = readDemoAccount();
-    $("demoAccountName").value = savedName;
-    $("downloadDemoAccount").hidden = !savedName;
-    $("demoAccountStatus").textContent = "";
-    $("demoAccountName").focus();
-  } else {
-    $("accountEntry").focus();
-  }
-};
-$("accountInfo").onsubmit = (event) => {
-  event.preventDefault();
-  const input = $("demoAccountName");
-  const name = input.value.trim();
-  if (!name || name.length > 60) {
-    $("demoAccountStatus").textContent = "Digite um apelido de 1 a 60 caracteres.";
-    input.focus();
-    return;
-  }
-  try {
-    localStorage.setItem(demoAccountKey, name);
-  } catch {
-    $("demoAccountStatus").textContent = "O navegador bloqueou o armazenamento. Você ainda pode entrar como convidado.";
-    return;
-  }
-  $("customer").value = name;
-  showAgenda(true);
-  render();
-};
-$("downloadDemoAccount").onclick = () => {
-  const name = readDemoAccount();
-  if (!name) {
-    $("demoAccountStatus").textContent = "Nenhum perfil de teste disponível para baixar.";
-    return;
-  }
-  const file = new Blob([name + "\n"], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "FioNexo-perfil-demo.txt";
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
+            const demoAccountKey = "fionexo:demo-account-name";
+      const demoProfileKey = "fionexo:demo-profile:v1";
+      function readDemoAccount() {
+        try { return localStorage.getItem(demoAccountKey) || ""; } catch { return ""; }
+      }
+      function readDemoProfile() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(demoProfileKey));
+          return saved && typeof saved.name === "string" &&
+            ["client", "owner"].includes(saved.role) ? saved : null;
+        } catch { return null; }
+      }
+      function openAccountForm(role) {
+        showAgenda(false, false);
+        $("accountInfo").hidden = false;
+        $("accountEntry").setAttribute("aria-expanded", "true");
+        const saved = readDemoProfile();
+        $("demoAccountName").value = saved?.name || readDemoAccount();
+        $("accountType").value = role || saved?.role || "client";
+        $("accountShop").value = saved?.shopId || shops[0].id;
+        $("ownerShopField").hidden = $("accountType").value !== "owner";
+        $("downloadDemoAccount").hidden = !readDemoAccount();
+        $("demoAccountStatus").textContent = "";
+        $("demoAccountName").focus();
+      }
+      $("accountEntry").onclick = () => openAccountForm();
+      $("topAccount").onclick = () => openAccountForm();
+      $("accountType").onchange = () => {
+        $("ownerShopField").hidden = $("accountType").value !== "owner";
+      };
+      $("accountInfo").onsubmit = (event) => {
+        event.preventDefault();
+        const name = $("demoAccountName").value.trim();
+        const role = $("accountType").value;
+        const shopId = role === "owner" ? $("accountShop").value : null;
+        if (!name || name.length > 60 || !["client", "owner"].includes(role) ||
+            (role === "owner" && !shops.some((entry) => entry.id === shopId))) {
+          $("demoAccountStatus").textContent = "Confira o nome e o tipo de perfil.";
+          return;
+        }
+        try {
+          localStorage.setItem(demoProfileKey, JSON.stringify({ name, role, shopId }));
+          localStorage.setItem(demoAccountKey, name);
+        } catch {
+          $("demoAccountStatus").textContent = "O navegador não permitiu salvar o perfil. Você pode entrar como convidado.";
+          return;
+        }
+        $("customer").value = name;
+        showAgenda(true);
+        render();
+        if (role === "owner") openOwnerManagement();
+      };
+      $("downloadDemoAccount").onclick = () => {
+        const saved = readDemoProfile();
+        const name = saved?.name || readDemoAccount();
+        if (!name) return;
+        const text = [name, saved?.role === "owner" ? "Perfil de barbearia" : "Perfil de cliente",
+          shops.find((entry) => entry.id === saved?.shopId)?.name || ""].join("\n");
+        const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "FioNexo-perfil-demo.txt";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
 
       const services = [
         ["Corte clássico", 30, 50],
@@ -1194,9 +1223,45 @@ $("downloadDemoAccount").onclick = () => {
           ],
         },
       ];
+            const rosterKey = "fionexo:team:v1";
+      let rosterChanges = [];
+      try {
+        const saved = JSON.parse(localStorage.getItem(rosterKey));
+        if (Array.isArray(saved)) rosterChanges = saved.filter((record) =>
+          record && shops.some((entry) => entry.id === record.shopId) &&
+          typeof record.name === "string" && record.name.trim() &&
+          !["__proto__", "constructor", "prototype"].includes(record.name) &&
+          Number.isFinite(record.joinedAt) &&
+          (record.removedAt === null || Number.isFinite(record.removedAt)));
+      } catch { /* The example team remains available when storage is blocked. */ }
+      for (const record of rosterChanges) {
+        const entry = shops.find((item) => item.id === record.shopId);
+        if (!entry.staff.includes(record.name)) entry.staff.push(record.name);
+      }
+      function rosterMember(entry, name) {
+        return rosterChanges.find((record) => record.shopId === entry.id && record.name === name);
+      }
+      function rosterActive(entry, name, at = Date.now()) {
+        const record = rosterMember(entry, name);
+        return !record || (record.joinedAt <= at && (record.removedAt === null || at < record.removedAt));
+      }
+      function activeStaff(entry) {
+        return entry.staff.filter((name) => rosterActive(entry, name));
+      }
+      function saveRoster(next) {
+        try { localStorage.setItem(rosterKey, JSON.stringify(next)); }
+        catch {
+          $("teamFeedback").textContent = "O navegador não permitiu salvar a equipe. Tente novamente.";
+          return false;
+        }
+        rosterChanges = next;
+        return true;
+      }
+
       let shop = shops[0],
-        staff = shop.staff;
+        staff = activeStaff(shop);
       for (const entry of shops) $("shop").add(new Option(entry.name, entry.id));
+      for (const [i, entry] of shops.entries()) $("accountShop").add(new Option((i + 1) + ". 💈 " + entry.name, entry.id));
       const state = { bookings: [], staff: {}, shopClosed: {} };
       let demoBookingSequence = 0;
       function createBookingId() {
@@ -1229,7 +1294,7 @@ $("downloadDemoAccount").onclick = () => {
         day = today(),
         slot = 0;
       const staffKey = (entry, name) => (entry.id === "central" ? name : entry.id + ":" + name);
-      const profile = (i = barber) => (state.staff[staffKey(shop, staff[i])] ??= {});
+      const profile = (i = barber) => (staff[i] ? (state.staff[staffKey(shop, staff[i])] ??= {}) : { absent: true });
       const inShop = (r) => (r.shopId || "central") === shop.id;
       $("shop").onchange = () => {
         const select = $("shop");
@@ -1239,7 +1304,7 @@ $("downloadDemoAccount").onclick = () => {
           return;
         }
         shop = selectedShop;
-        staff = shop.staff;
+        staff = activeStaff(shop);
         barber = 0;
         slot = 0;
         $("preferredTime").value = "";
@@ -1400,7 +1465,7 @@ $("downloadDemoAccount").onclick = () => {
         if (state.shopClosed?.[entry.id]) return { color: "off", text: "Fechada" };
         if (
           entry.staff.some(
-            (name) => profileStatus(state.staff[staffKey(entry, name)] || {}, now) === "Disponível",
+            (name) => rosterActive(entry, name, now) && profileStatus(state.staff[staffKey(entry, name)] || {}, now) === "Disponível",
           )
         )
           return { color: "green", text: "Aberta · Há barbeiro disponível" };
@@ -1452,7 +1517,19 @@ $("downloadDemoAccount").onclick = () => {
         const time = at(day, value);
         return Number.isFinite(time) ? time : 0;
       }
+            function renderEmptyStaff() {
+        renderShopStatus();
+        for (const id of ["staff", "panelStaff", "professional", "slots", "list"]) $(id).replaceChildren();
+        $("summary").textContent = "Esta barbearia está sem profissionais cadastrados.";
+        $("timeFeedback").textContent = "O responsável pode cadastrar profissionais na Área da barbearia.";
+        $("confirm").disabled = true;
+        for (const id of ["cut", "pause", "presence", "professional"]) $(id).disabled = true;
+        $("status").textContent = "Equipe vazia. Cadastre um profissional na gestão.";
+      }
+
       function render() {
+        if (!staff.length) return renderEmptyStaff();
+        for (const id of ["cut", "pause", "presence", "professional"]) $(id).disabled = false;
         renderShopStatus();
 
         for (const id of ["services", "staff", "panelStaff", "days", "slots", "list"])
@@ -2061,6 +2138,7 @@ $("downloadDemoAccount").onclick = () => {
             changed = true;
           }
           for (const [staffIndex, name] of entry.staff.entries()) {
+            if (!rosterActive(entry, name, now)) continue;
             const p = (state.staff[staffKey(entry, name)] ??= {});
             // Preserve attendance started through the barber panel.
             if (p.active && !p.demoServing) continue;
@@ -2134,7 +2212,7 @@ $("downloadDemoAccount").onclick = () => {
             let end = Math.floor((from + offset - 55 * min) / cycle) * cycle - offset + 55 * min;
             for (end += cycle; end <= now; end += cycle) {
               const start = end - 50 * min;
-              if (end < managementData.since) continue;
+              if (end < managementData.since || !rosterActive(entry, name, start) || !rosterActive(entry, name, end)) continue;
               const reserved = state.bookings.some((r) =>
                 (r.shopId || "central") === entry.id && r.barber === name &&
                 r.status !== "cancelled" && overlap(start, end, r.start, r.end));
@@ -2157,7 +2235,7 @@ $("downloadDemoAccount").onclick = () => {
         const shopId = $("managementShop").value;
         const entry = shops.find((item) => item.id === shopId);
         if (!entry) return;
-        $("managementTitle").textContent = "Gestão · " + entry.name;
+        $("managementTitle").textContent = "Área da barbearia · " + entry.name;
         const date = $("managementDate").value;
         const records = managementData.entries.filter((item) =>
           item.shopId === shopId && dateKey(new Date(item.end)) === date);
@@ -2208,16 +2286,102 @@ $("downloadDemoAccount").onclick = () => {
         $("managementShop").add(new Option((i + 1) + ". 💈 " + entry.name, entry.id));
       $("managementShop").onchange = renderManagement;
       $("managementDate").onchange = renderManagement;
-      $("openManagement").onclick = () => {
-        $("managementShop").value = shop.id;
+      $("openManagement").onclick = openOwnerManagement;
+      $("closeManagement").onclick = () => $("management").close();
+      $("management").addEventListener("close", () => $("openManagement").focus());
+      function ownedShop() {
+        const account = readDemoProfile();
+        return account?.role === "owner" ? shops.find((entry) => entry.id === account.shopId) : null;
+      }
+      function openOwnerManagement() {
+        const entry = ownedShop();
+        if (!entry) {
+          openAccountForm("owner");
+          $("demoAccountStatus").textContent = "Escolha o perfil de barbearia para experimentar a gestão.";
+          return;
+        }
+        $("managementShop").value = entry.id;
+        $("managementShop").disabled = true;
         $("managementDate").value = today();
         collectDemoCompletions(Date.now());
         renderManagement();
+        renderTeam();
         $("management").showModal();
+      }
+      function refreshTeamAgenda() {
+        staff = activeStaff(shop);
+        barber = Math.min(barber, Math.max(0, staff.length - 1));
+        slot = 0;
+        advanceDemo();
+        storeDemoState();
+        render();
+        renderManagement();
+        renderTeam();
+      }
+      function renderTeam() {
+        const entry = ownedShop();
+        $("teamList").replaceChildren();
+        if (!entry) return;
+        for (const name of entry.staff) {
+          const row = document.createElement("p"), label = document.createElement("span");
+          const active = rosterActive(entry, name);
+          label.textContent = name + (active ? " · Na equipe " : " · Removido ");
+          const action = document.createElement("button");
+          action.type = "button";
+          action.className = "pill";
+          action.textContent = active ? "Remover" : "Restaurar";
+          action.setAttribute("aria-label", action.textContent + " " + name);
+          action.onclick = () => changeTeamMember(entry.id, name, active);
+          row.append(label, action);
+          $("teamList").append(row);
+        }
+      }
+      function changeTeamMember(shopId, name, remove) {
+        const entry = ownedShop();
+        if (!entry || entry.id !== shopId) return;
+        const now = Date.now();
+        const attending = state.staff[staffKey(entry, name)]?.active;
+        const pending = state.bookings.some((r) => (r.shopId || "central") === entry.id &&
+          r.barber === name && ["confirmed", "active"].includes(r.status) && r.end > now);
+        if (remove && ((attending && attending.until > now) || pending)) {
+          $("teamFeedback").textContent = "Finalize o atendimento e resolva as reservas pendentes de " + name + " antes de remover.";
+          return;
+        }
+        collectDemoCompletions(now);
+        const next = rosterChanges.filter((record) => record.shopId !== entry.id || record.name !== name);
+        const previous = rosterMember(entry, name);
+        next.push({ shopId: entry.id, name, joinedAt: remove ? previous?.joinedAt || 0 : now, removedAt: remove ? now : null });
+        if (!saveRoster(next)) return;
+        refreshTeamAgenda();
+        $("teamFeedback").textContent = remove
+          ? name + " removido da equipe. O histórico foi preservado. Você pode restaurá-lo."
+          : name + " restaurado na equipe.";
+        $("teamName").focus();
+      }
+      $("teamForm").onsubmit = (event) => {
+        event.preventDefault();
+        const entry = ownedShop();
+        if (!entry) return;
+        const name = $("teamName").value.trim().replace(/\s+/g, " ");
+        if (!name || name.length > 60 || ["__proto__", "constructor", "prototype"].includes(name)) {
+          $("teamFeedback").textContent = "Use um nome de 1 a 60 caracteres.";
+          return;
+        }
+        if (entry.staff.some((item) => item.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) {
+          $("teamFeedback").textContent = "Esse profissional já está cadastrado. Use Restaurar se ele foi removido.";
+          return;
+        }
+        const next = [...rosterChanges, { shopId: entry.id, name, joinedAt: Date.now(), removedAt: null }];
+        if (!saveRoster(next)) return;
+        entry.staff.push(name);
+        refreshTeamAgenda();
+        $("teamName").value = "";
+        $("teamFeedback").textContent = name + " cadastrado na barbearia.";
+        $("teamName").focus();
       };
-      $("closeManagement").onclick = () => $("management").close();
-      $("management").addEventListener("close", () => $("openManagement").focus());
-let demoRefreshPending = false,
+      $("ownerArea").onclick = openOwnerManagement;
+
+      let demoRefreshPending = false,
         shopStatusPending = false,
         lastDemoMinute;
       function refreshVisibleStaff(now) {
@@ -2400,6 +2564,7 @@ let demoRefreshPending = false,
         $("notice").focus();
       }
       function start(r) {
+        if (!staff.length) return;
         const p = profile(),
           now = Date.now();
         if (p.active) return;
