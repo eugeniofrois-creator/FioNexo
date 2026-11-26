@@ -2542,6 +2542,13 @@
         shopStatusPending = false,
         lastDemoMinute;
       function refreshVisibleStaff(now) {
+        for (const option of $("professional").options) {
+          const index = Number(option.value);
+          const name = staff[index];
+          if (!name) continue;
+          const text = (index + 1) + ". " + name + " — " + profileStatus(profile(index), now);
+          if (option.text !== text) option.text = text;
+        }
         for (const id of ["staff", "panelStaff"]) {
           $(id).querySelectorAll("button").forEach((button, i) => {
             const p = profile(i);
@@ -2558,7 +2565,7 @@
         const now = Date.now(),
           currentMinute = Math.floor(now / min);
         const changed = advanceDemo(now);
-        if (changed) refreshVisibleStaff(now);
+        if (changed || currentMinute !== lastDemoMinute) refreshVisibleStaff(now);
         if (changed) storeDemoState();
         if (Math.floor(now / min) !== Math.floor(managementData.scanned / min)) collectDemoCompletions(now);
         if (changed || currentMinute !== lastDemoMinute) {
