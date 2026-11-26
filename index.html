@@ -1129,7 +1129,7 @@ $("downloadDemoAccount").onclick = () => {
           return p.demoServing
             ? "Atendendo · Cliente fictício até " + clock(p.active.until)
             : "Atendendo";
-        if (p.absent) return p.demoDayOff ? "De folga" : "Ausente";
+        if (p.absent) return p.demoDayOff ? "De folga · Retorna às " + clock(p.demoReturn) : "Ausente";
         const end = pauseEnd(p, now);
         return end > now ? "Ocupado · Intervalo até " + clock(end) : "Disponível";
       }
@@ -1906,60 +1906,58 @@ $("downloadDemoAccount").onclick = () => {
           return false;
         }
       }
+      function demoSchedule(shopIndex, staffIndex, now) {
+        const cycle = 24 * min;
+        const offset = (shopIndex * 7 + staffIndex * 3) * min;
+        const elapsed = ((now + offset) % cycle + cycle) % cycle;
+        const start = now - elapsed;
+        if (elapsed < 5 * min) return { kind: "available", until: start + 5 * min };
+        if (elapsed < 15 * min) return { kind: "serving", until: start + 15 * min };
+        if (elapsed < 19 * min) return { kind: "pause", until: start + 19 * min };
+        return { kind: "away", until: start + cycle };
+      }
       function prepareDemo(now = Date.now()) {
-        for (const [shopIndex, entry] of shops.entries()) {
-          state.shopClosed[entry.id] = shopIndex === shops.length - 1;
-          for (const [i, name] of entry.staff.entries()) {
-            const p = (state.staff[staffKey(entry, name)] = {
-              demoNext: now + (2 + (i % 4)) * min,
-            });
-            if (i === 1) p.pause = now + (1 + shopIndex) * min;
-            if (i === 2) {
-              p.active = { until: now + 3 * min };
-              p.demoServing = true;
-            }
-            if (i === 3) {
-              p.absent = true;
-              p.demoDayOff = true;
-            }
-          }
-        }
+        advanceDemo(now);
       }
       function advanceDemo(now = Date.now()) {
         let changed = false;
-        for (const entry of shops) {
-          for (const name of entry.staff) {
-            const p = state.staff[staffKey(entry, name)];
-            if (p.demoServing && p.active?.until <= now) {
-              delete p.active;
-              delete p.demoServing;
-              p.demoNext = now + min;
-              changed = true;
-            }
-            if (p.pause && p.pause <= now) {
-              delete p.pause;
-              p.demoNext = now + min;
-              changed = true;
-            }
-            if (
-              state.shopClosed[entry.id] ||
-              p.absent ||
-              p.active ||
-              pauseEnd(p, now) > now ||
-              p.demoNext > now
-            )
-              continue;
-            const end = now + (2 + Math.floor(Math.random() * 4)) * min;
+        for (const [shopIndex, entry] of shops.entries()) {
+          const closed = Math.floor(now / (15 * min)) % shops.length === shopIndex;
+          if (state.shopClosed[entry.id] !== closed) {
+            state.shopClosed[entry.id] = closed;
+            changed = true;
+          }
+          for (const [staffIndex, name] of entry.staff.entries()) {
+            const p = (state.staff[staffKey(entry, name)] ??= {});
+            // Preserve attendance started through the barber panel.
+            if (p.active && !p.demoServing) continue;
+            const scheduled = demoSchedule(shopIndex, staffIndex, now);
             const reserved = state.bookings.some(
-              (r) =>
-                (r.shopId || "central") === entry.id &&
-                r.barber === name &&
-                ["confirmed", "active"].includes(r.status) &&
-                overlap(now, end, r.start, r.end),
+              (r) => (r.shopId || "central") === entry.id &&
+                r.barber === name && ["confirmed", "active"].includes(r.status) &&
+                overlap(now, scheduled.until, r.start, r.end)
             );
-            if (reserved) continue;
-            p.active = { until: end };
-            p.demoServing = true;
+            const kind = closed || reserved ? "available" : scheduled.kind;
+            const signature = kind + ":" + scheduled.until;
+            if (p.demoSignature === signature) continue;
+            delete p.active;
+            delete p.pause;
+            delete p.absent;
+            delete p.demoServing;
+            delete p.demoDayOff;
+            delete p.demoReturn;
+            p.demoSignature = signature;
+            p.demoNext = scheduled.until;
+            if (kind === "serving") {
+              p.active = { until: scheduled.until };
+              p.demoServing = true;
+            }
+            if (kind === "pause") p.pause = scheduled.until;
+            if (kind === "away") {
+              p.absent = true;
+              p.demoDayOff = true;
+              p.demoReturn = scheduled.until;
+            }
             changed = true;
           }
         }
@@ -1968,10 +1966,24 @@ $("downloadDemoAccount").onclick = () => {
       let demoRefreshPending = false,
         shopStatusPending = false,
         lastDemoMinute;
+      function refreshVisibleStaff(now) {
+        for (const id of ["staff", "panelStaff"]) {
+          $(id).querySelectorAll("button").forEach((button, i) => {
+            const p = profile(i);
+            const detail = button.querySelector("small");
+            const text = profileStatus(p, now);
+            if (detail && detail.textContent !== text) detail.textContent = text;
+            const light = button.querySelector(".light");
+            if (light) light.className = "light " +
+              (p.active ? "yellow" : p.absent ? "off" : pauseEnd(p, now) > now ? "red" : "green");
+          });
+        }
+      }
       function refreshDemo() {
         const now = Date.now(),
           currentMinute = Math.floor(now / min);
         const changed = advanceDemo(now);
+        if (changed) refreshVisibleStaff(now);
         if (changed) storeDemoState();
         if (changed || currentMinute !== lastDemoMinute) {
           demoRefreshPending = true;
