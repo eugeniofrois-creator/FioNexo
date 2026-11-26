@@ -1863,6 +1863,30 @@ $("downloadDemoAccount").onclick = () => {
         );
         pendingDemoReplies.set(reservation, timer);
       }
+      const demoStateKey = "fionexo:demo-operation:v1";
+      function storeDemoState() {
+        try {
+          sessionStorage.setItem(demoStateKey, JSON.stringify(state));
+        } catch {
+          // The demo can still run in memory.
+        }
+      }
+      function restoreDemoState() {
+        try {
+          const saved = JSON.parse(sessionStorage.getItem(demoStateKey));
+          if (!saved || !Array.isArray(saved.bookings)) return false;
+          for (const entry of shops) {
+            if (typeof saved.shopClosed?.[entry.id] !== "boolean") return false;
+            for (const name of entry.staff) {
+              if (!Number.isFinite(saved.staff?.[staffKey(entry, name)]?.demoNext)) return false;
+            }
+          }
+          Object.assign(state, saved);
+          return true;
+        } catch {
+          return false;
+        }
+      }
       function prepareDemo(now = Date.now()) {
         for (const [shopIndex, entry] of shops.entries()) {
           state.shopClosed[entry.id] = shopIndex === shops.length - 1;
@@ -1928,7 +1952,9 @@ $("downloadDemoAccount").onclick = () => {
       function refreshDemo() {
         const now = Date.now(),
           currentMinute = Math.floor(now / min);
-        if (advanceDemo(now) || currentMinute !== lastDemoMinute) {
+        const changed = advanceDemo(now);
+        if (changed) storeDemoState();
+        if (changed || currentMinute !== lastDemoMinute) {
           demoRefreshPending = true;
           shopStatusPending = true;
         }
@@ -2081,6 +2107,8 @@ $("downloadDemoAccount").onclick = () => {
         $("chatFeedback").textContent = "Mensagem enviada na demonstração.";
       };
       function save(msg) {
+        storeDemoState();
+        
         render();
         $("notice").textContent = msg;
         $("notice").focus();
@@ -2338,7 +2366,9 @@ $("downloadDemoAccount").onclick = () => {
         }
       };
       try {
-        prepareDemo();
+        if (!restoreDemoState()) prepareDemo();
+        advanceDemo();
+        storeDemoState();
         $("bookingDate").value = day;
         render();
         $("guestEntry").disabled = false;
