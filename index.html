@@ -1184,11 +1184,18 @@ $("downloadDemoAccount").onclick = () => {
       const rescheduleRule =
         "Remarcação permitida com pelo menos 4 horas de antecedência do atendimento.";
       const canChange = (r) => r.status === "confirmed" && r.start > Date.now() && inShop(r);
+      function serviceSpeech(index) {
+        const [name, duration, price] = services[index];
+        const description = name === "Corte clássico" ? "Corte de cabelo clássico"
+          : name === "Corte e barba" ? "Corte de cabelo e barba" : name;
+        return (index + 1) + ". " + description + ". " + price + " reais. " + duration + " minutos.";
+      }
       function button(parent, title, detail, selected, action, kind = "choice") {
         const b = document.createElement("button");
         b.type = "button";
         b.className = kind;
         b.textContent = title;
+        if (parent === "services") b.setAttribute("aria-label", serviceSpeech(services.findIndex(([name]) => title.endsWith(name))));
         if (detail) {
           const s = document.createElement("small");
           s.textContent = detail;
@@ -1199,6 +1206,7 @@ $("downloadDemoAccount").onclick = () => {
           action();
           if (b.hasAttribute("aria-pressed"))
             $(parent).querySelector("[aria-pressed=true]")?.focus();
+          if (parent === "services") announceSelection("Serviço selecionado. " + serviceSpeech(service));
         };
         $(parent).append(b);
         return b;
@@ -2363,7 +2371,7 @@ $("downloadDemoAccount").onclick = () => {
         if (id === "shop") renderShopStatus();
         const area = $(id);
         const options = id === "services"
-          ? Array.from(area.querySelectorAll("button"), (button) => button.textContent)
+          ? services.map((_, index) => serviceSpeech(index))
           : Array.from(area.options, (option) => option.textContent);
         announceSelection(
           (id === "shop" ? "Barbearias. " : id === "professional" ? "Profissionais. " : "Serviços e preços. ") +
@@ -2374,9 +2382,7 @@ $("downloadDemoAccount").onclick = () => {
         ["readShops", "shop"], ["readServices", "services"], ["readStaff", "professional"]
       ]) {
         $(buttonId).onclick = () => {
-          if (audioControl.getAttribute("aria-pressed") !== "true") {
-            audioControl.setAttribute("aria-pressed", "true");
-          }
+          if (audioControl.getAttribute("aria-pressed") !== "true") return;
           lastOptionsAnnouncement = { id: "", time: 0 };
           announceOptions(optionsId);
         };
@@ -2385,15 +2391,14 @@ $("downloadDemoAccount").onclick = () => {
         $(id).addEventListener("focus", () => announceOptions(id));
         $(id).addEventListener("pointerdown", () => announceOptions(id));
       }
-      $("services").addEventListener("focusin", (event) => {
-        if (!$("services").contains(event.relatedTarget)) announceOptions("services");
-      });
+
 
       document.addEventListener("click", (event) => {
   if (audioControl.getAttribute("aria-pressed") !== "true") return;
   if (!(event.target instanceof Element)) return;
 
   const control = event.target.closest("button, a, input, select, textarea");
+  if (control?.matches("#services button")) return;
   if (control && !control.matches("#services button, #staff button, #days button, #slots button")) return;
 
   const textBlock = control || event.target.closest(
