@@ -2245,6 +2245,7 @@
         if ($("management").open) renderManagement();
       }
       function renderManagement() {
+        const focusedCashRecord = document.activeElement?.dataset?.cashRecordId;
         const shopId = $("managementShop").value;
         const entry = shops.find((item) => item.id === shopId);
         if (!entry) return;
@@ -2291,6 +2292,7 @@
           const actionCell = document.createElement("td"), action = document.createElement("button");
           action.type = "button";
           action.className = "pill";
+          action.dataset.cashRecordId = record.id;
           const cash = record.paymentMethod === "cash_demo";
           action.textContent = cash ? "Desfazer dinheiro" : "Registrar dinheiro";
           action.setAttribute("aria-label", action.textContent + " · " + record.barber + " · " + record.serviceName + " · " + clock(record.end));
@@ -2303,6 +2305,7 @@
           cell.colSpan = 7; cell.textContent = "Nenhum atendimento concluído registrado neste dia.";
           row.append(cell); $("managementLog").append(row);
         }
+        if (focusedCashRecord) focusCashAction(focusedCashRecord, true);
       }
       for (const [i, entry] of shops.entries())
         $("managementShop").add(new Option((i + 1) + ". 💈 " + entry.name, entry.id));
@@ -2338,9 +2341,17 @@
         $("cashFeedback").textContent = "";
         $("cashReceived").focus();
       }
+      function focusCashAction(id, preventScroll = false) {
+        if (!$("management").open) return;
+        const action = Array.from($("managementLog").querySelectorAll("button[data-cash-record-id]"))
+          .find((button) => button.dataset.cashRecordId === id);
+        (action || $("closeManagement")).focus({ preventScroll });
+      }
       function closeCashRecord() {
+        const previousRecordId = cashRecordId;
         cashRecordId = null;
         $("cashForm").hidden = true;
+        if (previousRecordId) focusCashAction(previousRecordId);
       }
       function commitCashRecord(record, replacement) {
         const entries = managementData.entries.map((item) => item.id === record.id ? replacement : item);
@@ -2387,6 +2398,7 @@
         for (const key of ["paymentMethod", "receivedCents", "changeCents", "cashRecordedAt", "cashRecordedBy"]) delete replacement[key];
         if (!commitCashRecord(record, replacement)) return;
         closeCashRecord();
+        focusCashAction(id);
         $("cashFeedback").textContent = "Registro em dinheiro desfeito. O atendimento continua no histórico demonstrativo.";
       }
       $("cancelCash").onclick = closeCashRecord;
