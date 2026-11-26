@@ -2285,11 +2285,23 @@ $("downloadDemoAccount").onclick = () => {
          voiceNotice("Leitura em voz alta desativada.");
          return;
        }
-       const message = "Leitura em voz alta ativada. Para agendar, escolha a barbearia, o serviço, o barbeiro, a data e o horário. Você também pode usar o botão Voz para navegar por comandos.";
+       const message = "Leitura em voz alta ativada. Clique em um título, texto ou rótulo da agenda para ouvi-lo.";
        voiceNotice(message);
        speakVoice(message);
       };
-      function voiceNotice(message) {
+      document.addEventListener("click", (event) => {
+  if (audioControl.getAttribute("aria-pressed") !== "true") return;
+  if (!(event.target instanceof Element)) return;
+  if (event.target.closest("button, a, input, select, textarea")) return;
+  const textBlock = event.target.closest(
+    "#mainContent h1, #mainContent h2, #mainContent h3, #mainContent p, #mainContent label, #summary"
+  );
+  const text = textBlock?.textContent.trim();
+  if (!text) return;
+  window.speechSynthesis.cancel();
+  speakVoice(text);
+});
+function voiceNotice(message) {
         $("voiceStatus").textContent = message;
       }
       function voiceNavigate(text) {
