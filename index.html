@@ -918,6 +918,7 @@
                 aria-describedby="timeHelp timeFeedback"
                 step="60"
             /></label>
+            <button type="button" class="pill" id="clearPreferredTime" aria-controls="preferredTime summary" disabled>Limpar horário</button>
             <p id="timeHelp" class="muted">
               Digite o horário que prefere ou toque em uma sugestão. Os horários disponíveis
               consideram o serviço, o barbeiro e a data escolhidos.
@@ -1530,7 +1531,16 @@
         const time = at(day, value);
         return Number.isFinite(time) ? time : 0;
       }
-            function renderEmptyStaff() {
+            $("clearPreferredTime").onclick = () => {
+        $("preferredTime").value = "";
+        slot = 0;
+        render();
+        const message = "Horário removido. Escolha outro horário para reservar.";
+        $("timeFeedback").textContent = message;
+        $("preferredTime").focus();
+        speakVoice(message, "timeFeedback", $("timeFeedback"));
+      };
+      function renderEmptyStaff() {
         renderShopStatus();
         for (const id of ["staff", "panelStaff", "professional", "slots", "list"]) $(id).replaceChildren();
         $("summary").textContent = "Esta barbearia está sem profissionais cadastrados.";
@@ -1541,6 +1551,7 @@
       }
 
       function render() {
+        $("clearPreferredTime").disabled = !$("preferredTime").value;
         if (!staff.length) return renderEmptyStaff();
         for (const id of ["cut", "pause", "presence", "professional"]) $(id).disabled = false;
         renderShopStatus();
