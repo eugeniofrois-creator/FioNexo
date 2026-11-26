@@ -745,8 +745,7 @@
       <section class="card" style="margin-top: 24px">
         <label for="shop"><strong>Escolha a barbearia</strong></label
         ><select
-          id="shop" aria-describedby="shopStatus"
-          aria-describedby="shopDemoLabel"
+          id="shop" aria-describedby="shopStatus shopDemoLabel"
           style="
             display: block;
             width: 100%;
@@ -756,6 +755,9 @@
             font: inherit;
           "
         ></select>
+        <button type="button" class="pill" id="readShops">Ouvir barbearias e disponibilidade</button>
+        <button type="button" class="pill" id="readServices">Ouvir serviços e preços</button>
+        <button type="button" class="pill" id="readStaff">Ouvir profissionais</button>
         <p id="shopStatus" role="status" aria-live="polite"></p>
         <small class="muted" id="shopDemoLabel">Barbearias de exemplo</small>
         <p class="muted">
@@ -2301,7 +2303,17 @@ $("downloadDemoAccount").onclick = () => {
        if (audioControl.getAttribute("aria-pressed") !== "true") return;
        const reply = new window.SpeechSynthesisUtterance(message);
        reply.lang = "pt-BR";
-       reply.onstart = () => highlightSpokenText(textElement, reply);
+       const parent = textElement?.parentElement;
+       const parentId = parent?.id;
+       const buttonIndex = textElement?.matches("button")
+         ? Array.from(parent?.querySelectorAll("button") || []).indexOf(textElement)
+         : -1;
+       reply.onstart = () => {
+         const currentElement = textElement?.isConnected ? textElement
+           : parentId && buttonIndex >= 0
+             ? $(parentId)?.querySelectorAll("button")[buttonIndex] : null;
+         highlightSpokenText(currentElement, reply);
+       };
        reply.onend = () => {
          if (highlightedReply === reply) clearSpokenText();
        };
@@ -2329,7 +2341,7 @@ $("downloadDemoAccount").onclick = () => {
        }
        const message = "Leitura em voz alta ativada. Clique em um título, texto ou rótulo da agenda para ouvi-lo.";
        voiceNotice(message);
-       speakVoice(message);
+       announceOptions("shop");
       };
       function selectedOptionText(select) {
         return select.selectedOptions[0]?.textContent.replace(/[🟢🟡⚫]/gu, "").trim() || "";
@@ -2340,7 +2352,7 @@ $("downloadDemoAccount").onclick = () => {
         clearSpokenText();
         window.speechSynthesis.cancel();
         voiceNotice(message);
-        speakVoice(message);
+        speakVoice(message, "voiceStatus", $("voiceStatus"));
       }
 
       let lastOptionsAnnouncement = { id: "", time: 0 };
@@ -2357,6 +2369,17 @@ $("downloadDemoAccount").onclick = () => {
           (id === "shop" ? "Barbearias. " : id === "professional" ? "Profissionais. " : "Serviços e preços. ") +
           options.join(". ").replace(/[🟢🟡⚫]/gu, "")
         );
+      }
+      for (const [buttonId, optionsId] of [
+        ["readShops", "shop"], ["readServices", "services"], ["readStaff", "professional"]
+      ]) {
+        $(buttonId).onclick = () => {
+          if (audioControl.getAttribute("aria-pressed") !== "true") {
+            audioControl.setAttribute("aria-pressed", "true");
+          }
+          lastOptionsAnnouncement = { id: "", time: 0 };
+          announceOptions(optionsId);
+        };
       }
       for (const id of ["shop", "professional"]) {
         $(id).addEventListener("focus", () => announceOptions(id));
