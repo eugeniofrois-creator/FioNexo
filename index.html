@@ -7,7 +7,7 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23241b17%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23fff2df%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23ffc198%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23090a0c%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23f5f3ed%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23d4bd8f%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
     />
     <style>
       * {
@@ -679,6 +679,69 @@
       #management table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
       #management th, #management td { text-align: left; padding: 12px 8px; border-bottom: 1px solid #cfbfb0; vertical-align: top; }
 
+      /* FioNexo — preto profundo, grafite e champanhe. */
+      :root {
+        --fn-background: #090a0c;
+        --fn-surface: #17191d;
+        --fn-raised: #22252b;
+        --fn-text: #f5f3ed;
+        --fn-muted: #c1c3c9;
+        --fn-border: #727680;
+        --fn-accent: #d4bd8f;
+        color-scheme: dark;
+      }
+      @media (forced-colors: none) {
+        body { background: var(--fn-background); color: var(--fn-text); }
+        header { background: #050607; color: var(--fn-text); }
+        .intro, .hero {
+          background: radial-gradient(ellipse at 85% 20%, #303239, transparent 65%), var(--fn-background);
+          color: var(--fn-text);
+        }
+        .hero::before { background: none; }
+        .hero h1, .hero p { color: var(--fn-text); }
+        .hero h1 em, .brand span, .tag, .eyebrow { color: var(--fn-accent); }
+        .hero .tag { background: var(--fn-surface); border-color: var(--fn-border); }
+        .card, .layout > .card, .layout > div > .card, aside .card {
+          background: var(--fn-surface);
+          color: var(--fn-text);
+          border-color: var(--fn-border);
+          box-shadow: 0 12px 28px #0004;
+        }
+        .choice, .pill, .intro .pill {
+          background: var(--fn-raised);
+          color: var(--fn-text);
+          border-color: var(--fn-border);
+        }
+        .choice:hover, .pill:hover { background: #30343b; border-color: var(--fn-accent); }
+        .choice[aria-pressed="true"], .pill[aria-pressed="true"] {
+          background: #353125;
+          border-color: var(--fn-accent);
+          box-shadow: inset 0 0 0 1px var(--fn-accent);
+        }
+        .cta, .cta:hover { background: var(--fn-accent); color: #111216; box-shadow: none; }
+        input, select, textarea, input[type="date"], input[type="time"] {
+          background: #101216;
+          color: var(--fn-text);
+          border-color: var(--fn-border);
+        }
+        input::placeholder, textarea::placeholder { color: var(--fn-muted); }
+        .muted, .choice small { color: var(--fn-muted); }
+        a { color: var(--fn-accent); }
+        .badge { color: #a1e1b9; }
+        .row, hr { border-color: var(--fn-border); }
+        #notice:not(:empty), .skip, dialog, #management {
+          background: var(--fn-surface); color: var(--fn-text); border-color: var(--fn-border);
+        }
+        #management th, #management td, .management-metrics p { border-color: var(--fn-border); }
+        .management-bar { background: #3b3e46; }
+        .management-bar span { background: var(--fn-accent); }
+        button:focus-visible, input:focus-visible, select:focus-visible,
+        textarea:focus-visible, a:focus-visible {
+          outline: 3px solid var(--fn-accent);
+          outline-offset: 3px;
+        }
+      }
+
 </style>
   </head>
   <body>
@@ -687,7 +750,7 @@
       <nav class="wrap">
         <div class="brand">
           <img
-            src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23241b17%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23fff2df%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23ffc198%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+            src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23090a0c%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23f5f3ed%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23d4bd8f%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
             width="36"
             height="36"
             alt=""
@@ -742,7 +805,7 @@
         </div>
         <img
           class="intro-mark"
-          src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23241b17%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23fff2df%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23ffc198%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23090a0c%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2046V18H26M13%2031H24%22%20stroke%3D%22%23f5f3ed%22%2F%3E%3Cpath%20d%3D%22M34%2046V18L51%2046V18%22%20stroke%3D%22%23d4bd8f%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
           width="240"
           height="240"
           alt=""
