@@ -1907,13 +1907,13 @@ $("downloadDemoAccount").onclick = () => {
         }
       }
       function demoSchedule(shopIndex, staffIndex, now) {
-        const cycle = 24 * min;
+        const cycle = 64 * min;
         const offset = (shopIndex * 7 + staffIndex * 3) * min;
         const elapsed = ((now + offset) % cycle + cycle) % cycle;
         const start = now - elapsed;
         if (elapsed < 5 * min) return { kind: "available", until: start + 5 * min };
-        if (elapsed < 15 * min) return { kind: "serving", until: start + 15 * min };
-        if (elapsed < 19 * min) return { kind: "pause", until: start + 19 * min };
+        if (elapsed < 55 * min) return { kind: "serving", until: start + 55 * min };
+        if (elapsed < 59 * min) return { kind: "pause", until: start + 59 * min };
         return { kind: "away", until: start + cycle };
       }
       function prepareDemo(now = Date.now()) {
@@ -1937,7 +1937,7 @@ $("downloadDemoAccount").onclick = () => {
                 r.barber === name && ["confirmed", "active"].includes(r.status) &&
                 overlap(now, scheduled.until, r.start, r.end)
             );
-            const kind = closed || reserved ? "available" : scheduled.kind;
+            const kind = reserved ? "available" : scheduled.kind;
             const signature = kind + ":" + scheduled.until;
             if (p.demoSignature === signature) continue;
             delete p.active;
