@@ -974,7 +974,8 @@
         <label for="managementShop">Barbearia</label>
         <select id="managementShop"></select>
         <label for="managementDate">Dia</label>
-        <input type="date" id="managementDate" required>
+        <input type="date" id="managementDate" required aria-describedby="managementDateFeedback">
+        <p id="managementDateFeedback" role="status"></p>
         <section aria-labelledby="teamTitle">
           <h3 id="teamTitle">Equipe da barbearia</h3>
           <form id="teamForm">
@@ -998,6 +999,7 @@
           </div>
         </form>
         <p id="cashFeedback" role="status"></p>
+        <div id="managementResults">
         <div class="management-metrics" id="managementMetrics"></div>
         <h3>Total demonstrativo por profissional</h3>
         <div class="management-chart" id="managementChart"></div>
@@ -1007,6 +1009,7 @@
             <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Pagamento</th><th scope="col">Origem</th><th scope="col">Dinheiro</th></tr></thead>
             <tbody id="managementLog"></tbody>
           </table>
+        </div>
         </div>
         <p id="managementFeedback" role="status"></p>
       </dialog>
@@ -2267,7 +2270,15 @@
         const entry = shops.find((item) => item.id === shopId);
         if (!entry) return;
         $("managementTitle").textContent = "Área da barbearia · " + entry.name;
-        const date = $("managementDate").value;
+        const dateInput = $("managementDate");
+        const date = dateInput.value;
+        const validDate = !!date && dateInput.validity.valid;
+        dateInput.setAttribute("aria-invalid", String(!validDate));
+        $("managementResults").hidden = !validDate;
+        const dateMessage = validDate ? "" : "Escolha um dia válido para consultar os totais e os atendimentos.";
+        if ($("managementDateFeedback").textContent !== dateMessage)
+          $("managementDateFeedback").textContent = dateMessage;
+        if (!validDate) return;
         const records = managementData.entries.filter((item) =>
           item.shopId === shopId && dateKey(new Date(item.end)) === date);
         const total = records.reduce((sum, item) => sum + item.price, 0);
@@ -2335,7 +2346,12 @@
       for (const [i, entry] of shops.entries())
         $("managementShop").add(new Option((i + 1) + ". 💈 " + entry.name, entry.id));
       $("managementShop").onchange = renderManagement;
-      $("managementDate").onchange = renderManagement;
+      $("managementDate").onchange = () => {
+        closeCashRecord(false);
+        $("cashFeedback").textContent = "";
+        renderManagement();
+      };
+      $("managementDate").oninput = $("managementDate").onchange;
       $("openManagement").onclick = openOwnerManagement;
       $("closeManagement").onclick = () => $("management").close();
       $("management").addEventListener("close", () => $("openManagement").focus());
@@ -2372,11 +2388,11 @@
           .find((button) => button.dataset.cashRecordId === id);
         (action || $("closeManagement")).focus({ preventScroll });
       }
-      function closeCashRecord() {
+      function closeCashRecord(restoreFocus = true) {
         const previousRecordId = cashRecordId;
         cashRecordId = null;
         $("cashForm").hidden = true;
-        if (previousRecordId) focusCashAction(previousRecordId);
+        if (previousRecordId && restoreFocus) focusCashAction(previousRecordId);
       }
       function commitCashRecord(record, replacement) {
         const entries = managementData.entries.map((item) => item.id === record.id ? replacement : item);
