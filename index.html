@@ -984,13 +984,26 @@
           <p id="teamFeedback" role="status"></p>
           <div id="teamList"></div>
         </section>
+        <form id="cashForm" class="card" hidden aria-labelledby="cashTitle">
+          <h3 id="cashTitle">Registrar dinheiro · demonstração</h3>
+          <p id="cashContext"></p>
+          <label for="cashReceived">Valor entregue pelo cliente</label>
+          <input id="cashReceived" type="text" inputmode="decimal" maxlength="18" required aria-describedby="cashContext cashChange">
+          <p id="cashChange" role="status"></p>
+          <label><input id="cashConfirmed" type="checkbox" required style="width:auto"> Confirmei o recebimento neste teste</label>
+          <div class="chips">
+            <button class="cta" type="submit">Confirmar dinheiro</button>
+            <button class="pill" type="button" id="cancelCash">Cancelar</button>
+          </div>
+        </form>
+        <p id="cashFeedback" role="status"></p>
         <div class="management-metrics" id="managementMetrics"></div>
         <h3>Total demonstrativo por profissional</h3>
         <div class="management-chart" id="managementChart"></div>
         <div class="management-table" tabindex="0" role="region" aria-label="Histórico de atendimentos">
           <table>
             <caption>Atendimentos concluídos no dia selecionado</caption>
-            <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Pagamento</th><th scope="col">Origem</th></tr></thead>
+            <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Pagamento</th><th scope="col">Origem</th><th scope="col">Dinheiro</th></tr></thead>
             <tbody id="managementLog"></tbody>
           </table>
         </div>
@@ -2248,7 +2261,8 @@
         for (const [title, value] of [
           ["Recebido · demonstração", money(total)], ["Concluídos", String(records.length)],
           ["Ticket médio", records.length ? money(total / records.length) : money(0)],
-          ["Reservas pendentes", String(pending)]
+          ["Reservas pendentes", String(pending)],
+          ["Dinheiro · demonstração", money(records.filter((item) => item.paymentMethod === "cash_demo").reduce((sum, item) => sum + item.price, 0))]
         ]) {
           const box = document.createElement("p"), number = document.createElement("strong");
           box.append(document.createTextNode(title)); number.textContent = value; box.append(number); metrics.append(box);
@@ -2271,14 +2285,22 @@
         for (const record of records.slice().sort((a, b) => b.end - a.end)) {
           const row = document.createElement("tr");
           for (const value of [clock(record.start) + "–" + clock(record.end), record.barber,
-            record.serviceName, money(record.price), "Pago · demonstração às " + clock(record.paidAt ?? record.end), record.source]) {
+            record.serviceName, money(record.price), record.paymentMethod === "cash_demo" ? "Pago em dinheiro · demonstração. Recebido " + money(record.receivedCents / 100) + ", troco " + money(record.changeCents / 100) + ". Registrado por " + record.cashRecordedBy + " às " + clock(record.cashRecordedAt) : "Pago · demonstração às " + clock(record.paidAt ?? record.end), record.source]) {
             const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
           }
+          const actionCell = document.createElement("td"), action = document.createElement("button");
+          action.type = "button";
+          action.className = "pill";
+          const cash = record.paymentMethod === "cash_demo";
+          action.textContent = cash ? "Desfazer dinheiro" : "Registrar dinheiro";
+          action.setAttribute("aria-label", action.textContent + " · " + record.barber + " · " + record.serviceName + " · " + clock(record.end));
+          action.onclick = () => cash ? undoCashRecord(record.id) : openCashRecord(record.id);
+          actionCell.append(action); row.append(actionCell);
           $("managementLog").append(row);
         }
         if (!records.length) {
           const row = document.createElement("tr"), cell = document.createElement("td");
-          cell.colSpan = 6; cell.textContent = "Nenhum atendimento concluído registrado neste dia.";
+          cell.colSpan = 7; cell.textContent = "Nenhum atendimento concluído registrado neste dia.";
           row.append(cell); $("managementLog").append(row);
         }
       }
@@ -2289,6 +2311,87 @@
       $("openManagement").onclick = openOwnerManagement;
       $("closeManagement").onclick = () => $("management").close();
       $("management").addEventListener("close", () => $("openManagement").focus());
+      let cashRecordId = null;
+      function cashAmounts(price, receivedText) {
+        const value = receivedText.trim();
+        if (!/^\d+(?:[.,]\d{1,2})?$/.test(value)) return null;
+        const [whole, fraction = ""] = value.replace(",", ".").split(".");
+        const receivedCents = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
+        const priceCents = Math.round(price * 100);
+        if (!Number.isSafeInteger(receivedCents) || !Number.isSafeInteger(priceCents) ||
+            priceCents < 0 || receivedCents < priceCents) return null;
+        return { receivedCents, changeCents: receivedCents - priceCents };
+      }
+      function editableCashRecord(id) {
+        const entry = ownedShop();
+        return entry && managementData.entries.find((record) => record.id === id && record.shopId === entry.id);
+      }
+      function openCashRecord(id) {
+        const record = editableCashRecord(id);
+        if (!record || record.paymentMethod === "cash_demo") return;
+        cashRecordId = id;
+        $("cashForm").hidden = false;
+        $("cashContext").textContent = record.barber + " · " + record.serviceName + " · " + money(record.price);
+        $("cashReceived").value = "";
+        $("cashConfirmed").checked = false;
+        $("cashChange").textContent = "Informe quanto o cliente entregou em dinheiro.";
+        $("cashFeedback").textContent = "";
+        $("cashReceived").focus();
+      }
+      function closeCashRecord() {
+        cashRecordId = null;
+        $("cashForm").hidden = true;
+      }
+      function commitCashRecord(record, replacement) {
+        const entries = managementData.entries.map((item) => item.id === record.id ? replacement : item);
+        try {
+          localStorage.setItem(managementKey, JSON.stringify({ ...managementData, entries }));
+        } catch {
+          $("cashFeedback").textContent = "O navegador não permitiu salvar. O registro anterior foi mantido.";
+          return false;
+        }
+        managementData.entries = entries;
+        renderManagement();
+        return true;
+      }
+      $("cashReceived").oninput = () => {
+        const record = editableCashRecord(cashRecordId);
+        const amounts = record && cashAmounts(record.price, $("cashReceived").value);
+        $("cashChange").textContent = amounts
+          ? "Troco de " + money(amounts.changeCents / 100) + "."
+          : "Informe um valor igual ou maior que o serviço, com até duas casas decimais.";
+      };
+      $("cashForm").onsubmit = (event) => {
+        event.preventDefault();
+        const record = editableCashRecord(cashRecordId);
+        if (!record || record.paymentMethod === "cash_demo") {
+          $("cashFeedback").textContent = "Esse atendimento já foi alterado. Confira o histórico.";
+          return;
+        }
+        const amounts = cashAmounts(record.price, $("cashReceived").value);
+        if (!amounts || !$("cashConfirmed").checked) {
+          $("cashFeedback").textContent = "Confira o valor e confirme o recebimento de teste.";
+          return;
+        }
+        const replacement = { ...record, paymentMethod: "cash_demo", ...amounts,
+          cashRecordedAt: Date.now(), cashRecordedBy: readDemoProfile().name };
+        if (!commitCashRecord(record, replacement)) return;
+        closeCashRecord();
+        $("cashFeedback").textContent = "Dinheiro registrado na demonstração. Serviço de " + money(record.price) +
+          ", recebido " + money(amounts.receivedCents / 100) + ", troco " + money(amounts.changeCents / 100) + ".";
+      };
+      function undoCashRecord(id) {
+        const record = editableCashRecord(id);
+        if (!record || record.paymentMethod !== "cash_demo") return;
+        const replacement = { ...record };
+        for (const key of ["paymentMethod", "receivedCents", "changeCents", "cashRecordedAt", "cashRecordedBy"]) delete replacement[key];
+        if (!commitCashRecord(record, replacement)) return;
+        closeCashRecord();
+        $("cashFeedback").textContent = "Registro em dinheiro desfeito. O atendimento continua no histórico demonstrativo.";
+      }
+      $("cancelCash").onclick = closeCashRecord;
+      $("management").addEventListener("close", closeCashRecord);
+
       function ownedShop() {
         const account = readDemoProfile();
         return account?.role === "owner" ? shops.find((entry) => entry.id === account.shopId) : null;
