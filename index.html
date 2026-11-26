@@ -975,6 +975,7 @@
         <select id="managementShop"></select>
         <label for="managementDate">Dia</label>
         <input type="date" id="managementDate" required aria-describedby="managementDateFeedback">
+        <button type="button" class="pill" id="managementToday" aria-controls="managementDate managementResults" aria-pressed="false">Hoje</button>
         <p id="managementDateFeedback" role="status"></p>
         <section aria-labelledby="teamTitle">
           <h3 id="teamTitle">Equipe da barbearia</h3>
@@ -1006,7 +1007,7 @@
         <div class="management-chart" id="managementChart"></div>
         <div class="management-table" tabindex="0" role="region" aria-label="Histórico de atendimentos">
           <table>
-            <caption>Atendimentos concluídos no dia selecionado</caption>
+            <caption id="managementLogCaption">Atendimentos concluídos no dia selecionado</caption>
             <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Pagamento</th><th scope="col">Origem</th><th scope="col">Dinheiro</th></tr></thead>
             <tbody id="managementLog"></tbody>
           </table>
@@ -2319,12 +2320,14 @@
         const dateInput = $("managementDate");
         const date = dateInput.value;
         const validDate = !!date && dateInput.validity.valid;
+        $("managementToday").setAttribute("aria-pressed", String(validDate && date === today()));
         dateInput.setAttribute("aria-invalid", String(!validDate));
         $("managementResults").hidden = !validDate;
         const dateMessage = validDate ? "" : "Escolha um dia válido para consultar os totais e os atendimentos.";
         if ($("managementDateFeedback").textContent !== dateMessage)
           $("managementDateFeedback").textContent = dateMessage;
         if (!validDate) return;
+        $("managementLogCaption").textContent = "Atendimentos concluídos · " + entry.name + " · " + label(at(date, "12:00"));
         const records = managementRecordsForDay(shopId, date);
         $("exportManagementDay").disabled = records.length === 0;
         const total = records.reduce((sum, item) => sum + item.price, 0);
@@ -2398,6 +2401,14 @@
         renderManagement();
       };
       $("managementDate").oninput = $("managementDate").onchange;
+      $("managementToday").onclick = () => {
+        const input = $("managementDate"), currentDay = today();
+        if (input.value !== currentDay) {
+          input.value = currentDay;
+          input.onchange();
+        }
+        input.focus();
+      };
       $("openManagement").onclick = openOwnerManagement;
       $("closeManagement").onclick = () => $("management").close();
       $("management").addEventListener("close", () => $("openManagement").focus());
