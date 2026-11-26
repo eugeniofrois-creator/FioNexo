@@ -201,7 +201,7 @@
         background: #fff8ed;
         color: #3a2a23;
       }
-      
+
       .row {
         display: flex;
         justify-content: space-between;
@@ -665,7 +665,21 @@
         text-decoration: underline;
         text-decoration-thickness: 2px;
       }
-    </style>
+
+      #management { width: min(94vw, 1000px); max-height: 88vh; overflow: auto; border: 1px solid #bca58e; border-radius: 20px; padding: 24px; background: #fffaf2; color: #29231f; }
+      #management select, #management input { font: inherit; max-width: 100%; padding: 8px; }
+      #management::backdrop { background: #0009; }
+      .management-metrics { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 12px; margin: 20px 0; }
+      .management-metrics p { padding: 16px; border: 1px solid #cfbfb0; border-radius: 12px; margin: 0; }
+      .management-metrics strong { display: block; font-size: 1.5rem; margin-top: 6px; }
+      .management-chart { display: grid; gap: 12px; }
+      .management-bar { height: 14px; background: #eee3d6; border-radius: 7px; overflow: hidden; }
+      .management-bar span { display: block; height: 100%; background: #97472e; }
+      .management-table { overflow-x: auto; margin-top: 20px; }
+      #management table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+      #management th, #management td { text-align: left; padding: 12px 8px; border-bottom: 1px solid #cfbfb0; vertical-align: top; }
+
+</style>
   </head>
   <body>
     <a class="skip" id="skipContent" href="#home">Ir para o conteúdo principal</a>
@@ -843,10 +857,32 @@
         <button class="cta" id="cut"></button> <button class="pill" id="pause"></button>
         <button class="pill" id="presence"></button><button class="pill" id="shopOpen"></button>
         <h3 id="panelBookingsTitle">Reservas</h3>
+        <button type="button" class="pill" id="openManagement">Gestão da barbearia</button>
         <div id="list"></div>
       </section>
       <p id="notice" role="status" tabindex="-1"></p>
-      <dialog
+
+      <dialog id="management" aria-labelledby="managementTitle" aria-describedby="managementScope">
+        <button type="button" class="pill" id="closeManagement">Fechar gestão</button>
+        <h2 id="managementTitle">Gestão da barbearia</h2>
+        <p id="managementScope">Valores demonstrativos. Histórico deste navegador, registrado a partir da ativação desta gestão e mantido por 7 dias. Pagamentos dependem de integração.</p>
+        <label for="managementShop">Barbearia</label>
+        <select id="managementShop"></select>
+        <label for="managementDate">Dia</label>
+        <input type="date" id="managementDate" required>
+        <div class="management-metrics" id="managementMetrics"></div>
+        <h3>Total demonstrativo por profissional</h3>
+        <div class="management-chart" id="managementChart"></div>
+        <div class="management-table" tabindex="0" role="region" aria-label="Histórico de atendimentos">
+          <table>
+            <caption>Atendimentos concluídos no dia selecionado</caption>
+            <thead><tr><th scope="col">Horário</th><th scope="col">Profissional</th><th scope="col">Serviço</th><th scope="col">Valor</th><th scope="col">Origem</th></tr></thead>
+            <tbody id="managementLog"></tbody>
+          </table>
+        </div>
+        <p id="managementFeedback" role="status"></p>
+      </dialog>
+<dialog
         id="chat"
         aria-labelledby="chatTitle"
         aria-describedby="chatInfo"
@@ -1963,7 +1999,128 @@ $("downloadDemoAccount").onclick = () => {
         }
         return changed;
       }
-      let demoRefreshPending = false,
+
+      const managementKey = "fionexo:management:v1";
+      let managementData = { since: Date.now(), scanned: Date.now(), entries: [] };
+      try {
+        const saved = JSON.parse(localStorage.getItem(managementKey));
+        if (saved && Number.isFinite(saved.since) && Number.isFinite(saved.scanned) &&
+            Array.isArray(saved.entries)) {
+          saved.entries = saved.entries.filter((entry) => entry && typeof entry.id === "string" &&
+            typeof entry.shopId === "string" && typeof entry.barber === "string" &&
+            typeof entry.serviceName === "string" && typeof entry.source === "string" &&
+            Number.isFinite(entry.price) && entry.price >= 0 &&
+            Number.isFinite(entry.start) && Number.isFinite(entry.end));
+          managementData = saved;
+        }
+      } catch { /* Storage is optional for the demo. */ }
+      function persistManagement() {
+        const cutoff = Date.now() - 7 * 24 * 60 * min;
+        managementData.entries = managementData.entries.filter((entry) => entry.end >= cutoff);
+        try {
+          localStorage.setItem(managementKey, JSON.stringify(managementData));
+          $("managementFeedback").textContent = "";
+        } catch {
+          $("managementFeedback").textContent = "Histórico disponível nesta sessão. O navegador não permitiu salvar os registros.";
+        }
+      }
+      function addManagementEntry(entry) {
+        if (managementData.entries.some((item) => item.id === entry.id)) return;
+        managementData.entries.push(entry);
+      }
+      function collectDemoCompletions(now) {
+        const from = Math.max(managementData.scanned, now - 7 * 24 * 60 * min);
+        const cycle = 64 * min;
+        for (const [shopIndex, entry] of shops.entries()) {
+          for (const [staffIndex, name] of entry.staff.entries()) {
+            const offset = (shopIndex * 7 + staffIndex * 3) * min;
+            let end = Math.floor((from + offset - 55 * min) / cycle) * cycle - offset + 55 * min;
+            for (end += cycle; end <= now; end += cycle) {
+              const start = end - 50 * min;
+              if (start < managementData.since) continue;
+              const reserved = state.bookings.some((r) =>
+                (r.shopId || "central") === entry.id && r.barber === name &&
+                r.status !== "cancelled" && overlap(start, end, r.start, r.end));
+              const manuallyCompleted = managementData.entries.some((record) =>
+                record.source === "Finalizado no painel" && record.shopId === entry.id &&
+                record.barber === name && overlap(start, end, record.start, record.end));
+              if (reserved || manuallyCompleted) continue;
+              const serviceIndex = (shopIndex + staffIndex) % services.length;
+              const [serviceName, , price] = services[serviceIndex];
+              addManagementEntry({ id: entry.id + ":" + staffIndex + ":" + end,
+                shopId: entry.id, barber: name, serviceName, price, start, end, source: "Cliente fictício" });
+            }
+          }
+        }
+        managementData.scanned = Math.max(managementData.scanned, now);
+        persistManagement();
+        if ($("management").open) renderManagement();
+      }
+      function renderManagement() {
+        const shopId = $("managementShop").value;
+        const entry = shops.find((item) => item.id === shopId);
+        if (!entry) return;
+        $("managementTitle").textContent = "Gestão · " + entry.name;
+        const date = $("managementDate").value;
+        const records = managementData.entries.filter((item) =>
+          item.shopId === shopId && dateKey(new Date(item.end)) === date);
+        const total = records.reduce((sum, item) => sum + item.price, 0);
+        const pending = state.bookings.filter((r) =>
+          (r.shopId || "central") === shopId && ["confirmed", "active"].includes(r.status) &&
+          dateKey(new Date(r.start)) === date).length;
+        const metrics = $("managementMetrics");
+        metrics.replaceChildren();
+        for (const [title, value] of [
+          ["Total demonstrativo", money(total)], ["Concluídos", String(records.length)],
+          ["Ticket médio", records.length ? money(total / records.length) : money(0)],
+          ["Reservas pendentes", String(pending)]
+        ]) {
+          const box = document.createElement("p"), number = document.createElement("strong");
+          box.append(document.createTextNode(title)); number.textContent = value; box.append(number); metrics.append(box);
+        }
+        const totals = entry.staff.map((name) => ({
+          name, total: records.filter((item) => item.barber === name).reduce((sum, item) => sum + item.price, 0),
+          count: records.filter((item) => item.barber === name).length
+        }));
+        const max = Math.max(1, ...totals.map((item) => item.total));
+        $("managementChart").replaceChildren();
+        for (const item of totals) {
+          const row = document.createElement("div"), text = document.createElement("p");
+          text.textContent = item.name + " · " + money(item.total) + " · " + item.count + " atendimento(s)";
+          const track = document.createElement("div"), bar = document.createElement("span");
+          track.className = "management-bar"; track.setAttribute("aria-hidden", "true");
+          bar.style.width = (item.total / max * 100) + "%";
+          track.append(bar); row.append(text, track); $("managementChart").append(row);
+        }
+        $("managementLog").replaceChildren();
+        for (const record of records.slice().sort((a, b) => b.end - a.end)) {
+          const row = document.createElement("tr");
+          for (const value of [clock(record.start) + "–" + clock(record.end), record.barber,
+            record.serviceName, money(record.price), record.source]) {
+            const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
+          }
+          $("managementLog").append(row);
+        }
+        if (!records.length) {
+          const row = document.createElement("tr"), cell = document.createElement("td");
+          cell.colSpan = 5; cell.textContent = "Nenhum atendimento concluído registrado neste dia.";
+          row.append(cell); $("managementLog").append(row);
+        }
+      }
+      for (const [i, entry] of shops.entries())
+        $("managementShop").add(new Option((i + 1) + ". " + entry.name, entry.id));
+      $("managementShop").onchange = renderManagement;
+      $("managementDate").onchange = renderManagement;
+      $("openManagement").onclick = () => {
+        $("managementShop").value = shop.id;
+        $("managementDate").value = today();
+        collectDemoCompletions(Date.now());
+        renderManagement();
+        $("management").showModal();
+      };
+      $("closeManagement").onclick = () => $("management").close();
+      $("management").addEventListener("close", () => $("openManagement").focus());
+let demoRefreshPending = false,
         shopStatusPending = false,
         lastDemoMinute;
       function refreshVisibleStaff(now) {
@@ -1985,6 +2142,7 @@ $("downloadDemoAccount").onclick = () => {
         const changed = advanceDemo(now);
         if (changed) refreshVisibleStaff(now);
         if (changed) storeDemoState();
+        if (Math.floor(now / min) !== Math.floor(managementData.scanned / min)) collectDemoCompletions(now);
         if (changed || currentMinute !== lastDemoMinute) {
           demoRefreshPending = true;
           shopStatusPending = true;
@@ -2139,7 +2297,7 @@ $("downloadDemoAccount").onclick = () => {
       };
       function save(msg) {
         storeDemoState();
-        
+
         render();
         $("notice").textContent = msg;
         $("notice").focus();
@@ -2183,7 +2341,7 @@ $("downloadDemoAccount").onclick = () => {
           return;
         if (r) r.status = "active";
         delete p.demoServing;
-        p.active = { id: r?.id, until: end };
+        p.active = { id: r?.id, until: end, started: now, serviceName: r?.serviceName || services[service][0], price: r?.price ?? services[service][2] };
         save(
           "Atendimento iniciado por " +
             staff[barber] +
@@ -2224,6 +2382,7 @@ $("downloadDemoAccount").onclick = () => {
           barber: staff[barber],
           customer,
           serviceName: services[service][0],
+          price: services[service][2],
           start: slot,
           end: slot + services[service][1] * min,
           status: "confirmed",
@@ -2255,6 +2414,13 @@ $("downloadDemoAccount").onclick = () => {
         if (!p.active) return start();
         const r = state.bookings.find((r) => r.id === p.active.id);
         if (r) r.status = "done";
+        const serviceName = p.active.serviceName || r?.serviceName || services[service][0];
+        const price = p.active.price ?? r?.price ?? services.find(([name]) => name === serviceName)?.[2] ?? 0;
+        addManagementEntry({ id: "manual:" + (r?.id || shop.id + ":" + staff[barber] + ":" + p.active.until),
+          shopId: shop.id, barber: staff[barber], serviceName, price,
+          start: p.active.started ?? r?.start ?? p.active.until - 30 * min, end: Date.now(), source: "Finalizado no painel" });
+        persistManagement();
+
         delete p.active;
         delete p.demoServing;
         p.demoNext = Date.now() + min;
