@@ -155,6 +155,15 @@
         opacity: 0.55;
         cursor: default;
       }
+      @media (min-width: 661px) and (min-height: 640px) {
+        .layout > aside {
+          position: sticky;
+          top: 16px;
+          align-self: start;
+          max-height: calc(100dvh - 32px);
+          overflow-y: auto;
+        }
+      }
       aside .card {
         background: #29231f;
         color: #fff8ed;
@@ -185,6 +194,14 @@
       #notice {
         min-height: 24px;
       }
+      #notice:not(:empty) {
+        padding: 12px 16px;
+        border: 1px solid currentColor;
+        border-radius: 12px;
+        background: #fff8ed;
+        color: #3a2a23;
+      }
+      
       .row {
         display: flex;
         justify-content: space-between;
@@ -222,10 +239,9 @@
         background: #fffaf2;
         color: #29231f;
         padding: 12px;
-        transform: translateY(-180%);
       }
-      .skip:focus {
-        transform: none;
+      .skip:not(:focus) {
+        clip-path: inset(50%);
       }
       select:focus-visible,
       a:focus-visible {
@@ -409,15 +425,14 @@
           transition: none !important;
           transform: none;
         }
-        .skip:not(:focus) {
-          transform: translateY(-180%);
-        }
       }
       #bootStatus {
         position: fixed;
         bottom: 18px;
-        left: 50%;
-        transform: translateX(-50%);
+        inset-inline: 16px;
+        width: fit-content;
+        max-width: calc(100% - 32px);
+        margin-inline: auto;
         padding: 12px 18px;
         border-radius: 12px;
         background: #29231f;
@@ -462,9 +477,6 @@
         }
         .hero h1 {
           font-size: 46px;
-        }
-        aside .card {
-          position: static;
         }
         .choice {
           padding: 15px;
@@ -587,6 +599,10 @@
         .light {
           border: 2px solid CanvasText;
         }
+        :is(button, input, select, a, [tabindex]):focus-visible {
+          outline: 3px solid Highlight;
+          outline-offset: 3px;
+        }
       }
 
       [hidden] {
@@ -641,6 +657,7 @@
           flex-wrap: wrap;
         }
       }
+    #confirm:enabled + #confirmHelp { display: none; }
     </style>
   </head>
   <body>
@@ -658,7 +675,7 @@
         </div>
         <div class="chips" id="agendaControls" hidden>
           <button type="button" class="pill" id="backHome">Início</button
-          ><button
+          ><button type="button" class="pill" id="enableAudio" aria-pressed="false">Leitura em voz alta</button><button
             type="button"
             class="pill"
             id="voice"
@@ -682,7 +699,7 @@
             barbeiro e marque o melhor horário para você.
           </p>
           <div class="chips">
-            <button type="button" class="cta" id="guestEntry">Entrar como convidado</button>
+            <button type="button" class="cta" id="guestEntry" disabled>Entrar como convidado</button>
             <button
               type="button"
               class="pill"
@@ -710,14 +727,15 @@
     <main class="wrap" id="mainContent" tabindex="-1" hidden aria-labelledby="agendaTitle">
       <h1 id="agendaTitle" tabindex="-1">Agende seu horário</h1>
       <p id="voiceHelp" hidden>
-        Diga: barbearias, serviços, barbeiros, data, horários, minhas reservas ou painel do
+        Diga: barbearias, serviços, barbeiros, data, horários, meu nome, minhas reservas ou painel do
         barbeiro.
       </p>
       <p id="voiceStatus" role="status" aria-live="polite" aria-atomic="true"></p>
       <section class="card" style="margin-top: 24px">
         <label for="shop"><strong>Escolha a barbearia</strong></label
         ><select
-          id="shop"
+          id="shop" aria-describedby="shopStatus"
+          aria-describedby="shopDemoLabel"
           style="
             display: block;
             width: 100%;
@@ -728,7 +746,7 @@
           "
         ></select>
         <p id="shopStatus" role="status" aria-live="polite"></p>
-        <small class="muted">Barbearias de exemplo</small>
+        <small class="muted" id="shopDemoLabel">Barbearias de exemplo</small>
         <p class="muted">
           Demonstração ao vivo · barbearias e atendimentos fictícios. Reservas de teste duram apenas
           nesta aba.
@@ -736,14 +754,14 @@
       </section>
       <div class="layout" id="client">
         <div>
-          <section class="card">
+          <section class="card" aria-labelledby="bookingServiceTitle">
             <div class="eyebrow">01 · Serviço</div>
-            <h2>O que vamos fazer?</h2>
+            <h2 id="bookingServiceTitle">Escolha o serviço</h2>
             <div class="grid" id="services" role="group" aria-label="Serviços disponíveis"></div>
           </section>
-          <section class="card">
+          <section class="card" aria-labelledby="bookingBarberTitle">
             <div class="eyebrow">02 · Profissional</div>
-            <h2>Escolha seu barbeiro</h2>
+            <h2 id="bookingBarberTitle">Escolha seu barbeiro</h2>
             <label>Escolha seu barbeiro<select id="professional"></select></label>
             <div
               class="grid"
@@ -752,10 +770,15 @@
               aria-label="Barbeiros da barbearia selecionada"
             ></div>
           </section>
-          <section class="card">
+          <section class="card" aria-labelledby="bookingTimeTitle">
             <div class="eyebrow">03 · Data e horário</div>
-            <h2>Quando você prefere?</h2>
-            <label>Escolha a data<input type="date" id="bookingDate" required /></label>
+            <h2 id="bookingTimeTitle">Escolha a data e o horário</h2>
+            <label>
+              Escolha a data
+              <input type="date" id="bookingDate" aria-describedby="bookingDateHelp dateFeedback" required />
+            </label>
+            <p id="bookingDateHelp" class="muted">Escolha hoje ou uma data futura. Você também pode usar os atalhos abaixo.</p>
+            <p id="dateFeedback" role="status" hidden></p>
             <div class="chips" id="days" role="group" aria-label="Sugestões de datas"></div>
             <label
               >Qual horário você prefere?<input
@@ -769,7 +792,7 @@
               consideram o serviço, o barbeiro e a data escolhidos.
             </p>
             <p id="timeFeedback" role="status"></p>
-            <p class="muted">Sugestões disponíveis mais próximas</p>
+            <p class="muted" id="slotSuggestionsTitle" hidden>Primeiros horários livres do dia</p>
             <div
               class="chips"
               id="slots"
@@ -785,12 +808,15 @@
             <div id="summary" aria-live="polite" aria-atomic="true"></div>
             <hr />
             <label
-              >Seu nome<input id="customer" required maxlength="60" autocomplete="name" /></label
-            ><button class="cta" id="confirm">Confirmar reserva</button>
-            <p><small>Demonstração local · sem cobrança</small></p>
+              >Seu nome<input id="customer" required maxlength="60" autocomplete="off" aria-describedby="customerHelp" /></label>
+            <p class="muted" id="customerHelp"><small>Use um nome fictício para testar a reserva.</small></p>
+            <button class="cta" id="confirm" aria-describedby="summary reservationDemoNotice">Confirmar reserva</button>
+            <p id="confirmHelp" class="muted"><small>Escolha um horário livre para liberar a confirmação.</small></p>
+            <p id="reservationDemoNotice"><small>O valor no resumo é ilustrativo. Esta reserva de teste não gera cobrança.</small></p>
           </form>
-          <section class="card">
-            <h2>Minhas reservas</h2>
+          <section class="card" aria-labelledby="myBookingsTitle" aria-describedby="myBookingsShop">
+            <h2 id="myBookingsTitle">Minhas reservas</h2>
+            <p id="myBookingsShop" class="muted"></p>
             <div id="myBookings"></div>
           </section>
         </aside>
@@ -798,11 +824,12 @@
       <section class="card" id="panel" hidden>
         <div class="eyebrow">Área do profissional</div>
         <h2>Painel do barbeiro</h2>
-        <div class="grid" id="panelStaff"></div>
+        <h3 id="panelStaffTitle">Selecione o profissional</h3>
+        <div class="grid" id="panelStaff" role="group" aria-labelledby="panelStaffTitle"></div>
         <p class="badge" id="status" role="status" aria-live="polite" aria-atomic="true"></p>
         <button class="cta" id="cut"></button> <button class="pill" id="pause"></button>
         <button class="pill" id="presence"></button><button class="pill" id="shopOpen"></button>
-        <h3>Reservas</h3>
+        <h3 id="panelBookingsTitle">Reservas</h3>
         <div id="list"></div>
       </section>
       <p id="notice" role="status" tabindex="-1"></p>
@@ -829,8 +856,9 @@
           tabindex="0"
           style="max-height: 35vh; overflow: auto; overflow-wrap: anywhere"
         ></ul>
-        <section id="quickReplies" hidden aria-labelledby="quickTitle">
+        <section id="quickReplies" hidden aria-labelledby="quickTitle" aria-describedby="quickHelp">
           <p id="quickTitle"><strong>Respostas rápidas</strong></p>
+          <p id="quickHelp">Escolha uma resposta para preencher a mensagem. Revise antes de enviar.</p>
           <div class="chips" id="replyButtons"></div>
         </section>
         <form id="sendMessage">
@@ -865,9 +893,10 @@
             >Nova data<input
               type="date"
               id="rescheduleDay"
-              aria-describedby="rescheduleFeedback"
+              aria-describedby="rescheduleDateRange rescheduleFeedback"
               required
           /></label>
+          <p id="rescheduleDateRange"></p>
           <p>
             <label
               >Novo horário
@@ -876,14 +905,15 @@
           </p>
           <p id="rescheduleFeedback" role="status"></p>
           <button class="cta" id="rescheduleConfirm">Confirmar novo horário</button>
-          <button type="button" class="pill" id="closeReschedule">Voltar</button>
+          <button type="button" class="pill" id="closeReschedule">Manter reserva atual</button>
         </form>
       </dialog>
     </main>
     <div id="bootStatus" role="status" aria-live="polite">Preparando sua agenda…</div>
     <noscript
       ><style>
-        #bootStatus {
+        #bootStatus,
+        #guestEntry {
           display: none;
         }
       </style>
@@ -903,7 +933,7 @@
         $("mainContent").hidden = !open;
         $("agendaControls").hidden = !open;
         $("skipContent").href = open ? "#mainContent" : "#home";
-        $(open ? "agendaTitle" : "homeTitle").focus();
+        $(open ? "agendaTitle" : "guestEntry").focus();
       }
       $("guestEntry").onclick = () => {
         showAgenda(true);
@@ -976,18 +1006,25 @@
       }
 
       const dateKey = (d) => new Date(+d - d.getTimezoneOffset() * min).toISOString().slice(0, 10);
-      const today = () => dateKey(new Date()),
-        at = (day, clock) => +new Date(day + "T" + clock),
-        clock = (t) =>
-          new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-      const label = (t) =>
-        new Date(t).toLocaleDateString("pt-BR", {
-          weekday: "short",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      const money = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      const today = () => dateKey(new Date());
+      const at = (day, clock) => +new Date(day + "T" + clock);
+      const timeFormat = new Intl.DateTimeFormat("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const dateFormat = new Intl.DateTimeFormat("pt-BR", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const priceFormat = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
+      const clock = (t) => timeFormat.format(t);
+      const label = (t) => dateFormat.format(t);
+      const money = (n) => priceFormat.format(n);
       const overlap = (a, b, c, d) => a < d && c < b;
       let service = 0,
         barber = 0,
@@ -997,19 +1034,26 @@
       const profile = (i = barber) => (state.staff[staffKey(shop, staff[i])] ??= {});
       const inShop = (r) => (r.shopId || "central") === shop.id;
       $("shop").onchange = () => {
-        shop = shops.find((x) => x.id === $("shop").value);
+        const select = $("shop");
+        const selectedShop = shops.find((entry) => entry.id === select.value);
+        if (!selectedShop || selectedShop === shop) {
+          select.value = shop.id;
+          return;
+        }
+        shop = selectedShop;
         staff = shop.staff;
         barber = 0;
         slot = 0;
+        $("preferredTime").value = "";
         $("notice").textContent = "";
         render();
       };
       function pauseEnd(p, now) {
-        let lunch = at(today(), "13:00");
-        return Math.max(
-          p.pause || 0,
-          now >= at(today(), "12:00") && now < lunch && p.skip !== today() ? lunch : 0,
-        );
+        const day = dateKey(new Date(now));
+        const lunchEnd = at(day, "13:00");
+        const scheduledPause =
+          now >= at(day, "12:00") && now < lunchEnd && p.skip !== day ? lunchEnd : 0;
+        return Math.max(p.pause || 0, scheduledPause);
       }
       function profileStatus(p, now = Date.now()) {
         if (p.active)
@@ -1064,6 +1108,8 @@
         done: "Finalizada",
         cancelled: "Cancelada",
       };
+      const bookingStatusLabel = (status) =>
+        Object.hasOwn(bookingStatus, status) ? bookingStatus[status] : "Status indisponível";
       const rescheduleLeadTime = 4 * 60 * min;
       const canReschedule = (r) => canChange(r) && r.start - Date.now() >= rescheduleLeadTime;
       const rescheduleRule =
@@ -1090,9 +1136,10 @@
       }
       function nextAvailable() {
         const duration = services[service][1] * min;
+        const searchStart = new Date();
         for (let offset = 0; offset < 7; offset++) {
-          const date = new Date();
-          date.setDate(date.getDate() + offset);
+          const date = new Date(searchStart);
+          date.setDate(searchStart.getDate() + offset);
           const key = dateKey(date);
           const latestStart = at(key, "18:00") - duration;
           for (let time = at(key, "09:00"); time <= latestStart; time += 15 * min) {
@@ -1104,7 +1151,8 @@
       function chooseNextAvailable() {
         if (state.shopClosed?.[shop.id]) {
           $("notice").textContent =
-            "Esta barbearia está fechada para novas reservas. Escolha outra barbearia ou aguarde a reabertura.";
+            shop.name +
+            " está fechada para novas reservas. Escolha outra barbearia ou aguarde a reabertura.";
           $("notice").focus();
           return;
         }
@@ -1131,27 +1179,34 @@
         slot = next.time;
         $("preferredTime").value = new Date(slot).toTimeString().slice(0, 5);
         render();
+        if (!slot) {
+          $("notice").textContent =
+            "O horário encontrado ficou indisponível. Busque novamente ou escolha outro horário.";
+          $("notice").focus();
+          return;
+        }
         $("notice").textContent =
           "Próximo horário com " + staff[barber] + ": " + label(slot) + " às " + clock(slot) + ".";
         $("slots").querySelector("[aria-pressed=true]")?.focus();
       }
-      function shopAvailability(entry) {
+      function shopAvailability(entry, now) {
         if (state.shopClosed?.[entry.id]) return { color: "off", text: "Fechada" };
         if (
           entry.staff.some(
-            (name) => profileStatus(state.staff[staffKey(entry, name)] || {}) === "Disponível",
+            (name) => profileStatus(state.staff[staffKey(entry, name)] || {}, now) === "Disponível",
           )
         )
           return { color: "green", text: "Aberta · Há barbeiro disponível" };
-        return { color: "yellow", text: "Aberta · Todos ocupados ou ausentes" };
+        return { color: "yellow", text: "Aberta · Nenhum barbeiro disponível agora" };
       }
       function renderShopStatus() {
-        const availability = shopAvailability(shop),
+        const now = Date.now();
+        const availability = shopAvailability(shop, now),
           container = $("shopStatus");
         const dots = { green: "🟢", yellow: "🟡", off: "⚫" };
         for (const option of $("shop").options) {
           const entry = shops.find((item) => item.id === option.value);
-          const { color, text } = entry === shop ? availability : shopAvailability(entry);
+          const { color, text } = entry === shop ? availability : shopAvailability(entry, now);
           const label = dots[color] + " " + entry.name + " — " + text;
           if (option.text !== label) option.text = label;
         }
@@ -1201,11 +1256,17 @@
         );
         const staffStatusTime = Date.now();
         const staffStatuses = staff.map((_, i) => profileStatus(profile(i), staffStatusTime));
-        $("professional").replaceChildren();
-        staff.forEach((name, i) =>
-          $("professional").add(new Option(name + " — " + staffStatuses[i], i)),
-        );
-        $("professional").value = barber;
+        const professionalSelect = $("professional");
+        const professionalLabels = staff.map((name, i) => name + " — " + staffStatuses[i]);
+        if (
+          professionalSelect.options.length !== professionalLabels.length ||
+          professionalLabels.some((label, i) => professionalSelect.options[i].text !== label)
+        ) {
+          professionalSelect.replaceChildren(
+            ...professionalLabels.map((label, i) => new Option(label, i)),
+          );
+        }
+        professionalSelect.value = String(barber);
         for (const id of ["staff", "panelStaff"])
           staff.forEach((name, i) => {
             const b = button(id, name, staffStatuses[i], i === barber, () => {
@@ -1228,12 +1289,13 @@
             b.prepend(light);
           });
         const dateInput = $("bookingDate");
-        dateInput.min = today();
+        const calendarStart = new Date();
+        dateInput.min = dateKey(calendarStart);
         const validDate = !!dateInput.value && dateInput.validity.valid;
 
         for (let i = 0; i < 7; i++) {
-          const d = new Date();
-          d.setDate(d.getDate() + i);
+          const d = new Date(calendarStart);
+          d.setDate(calendarStart.getDate() + i);
           const key = dateKey(d);
           button(
             "days",
@@ -1264,9 +1326,18 @@
           desired ? Math.abs(a - desired) - Math.abs(b - desired) || a - b : a - b,
         );
         let timeFeedback = "Digite um horário ou escolha uma sugestão.";
-        if (!validDate) timeFeedback = "Escolha uma data a partir de hoje para ver os horários.";
+        const dateFeedback = $("dateFeedback");
+        const dateMessage = dateInput.validity.rangeUnderflow
+          ? "Essa data já passou. Escolha hoje ou uma data futura."
+          : "Preencha a data para ver os horários.";
+        if (validDate) dateInput.removeAttribute("aria-invalid");
+        else dateInput.setAttribute("aria-invalid", "true");
+        dateFeedback.hidden = validDate;
+        const dateText = validDate ? "" : dateMessage;
+        if (dateFeedback.textContent !== dateText) dateFeedback.textContent = dateText;
+        if (!validDate) timeFeedback = "Os horários aparecem após a escolha da data.";
         else if (state.shopClosed?.[shop.id])
-          timeFeedback = "Esta barbearia está fechada. Escolha outra barbearia.";
+          timeFeedback = shop.name + " está fechada para reservas. Escolha outra barbearia.";
         else if (profile().absent)
           timeFeedback =
             staff[barber] + " está indisponível para reservas. Escolha outro barbeiro.";
@@ -1274,38 +1345,41 @@
           timeFeedback =
             "Sem horários livres com " +
             staff[barber] +
-            " nesta data. Escolha outro dia ou barbeiro.";
+            " nesta data. Escolha outra data ou outro profissional.";
+        else if (!$("preferredTime").validity.valid)
+          timeFeedback = "Complete o campo com um horário válido.";
+        else if (desired && !slot && desired <= Date.now())
+          timeFeedback = "O horário das " + clock(desired) + " já passou. Escolha uma sugestão abaixo.";
         else if (desired)
           timeFeedback = slot
             ? "Horário disponível. Confira o resumo e confirme."
             : "Este horário não está livre. Escolha uma sugestão abaixo.";
         if ($("timeFeedback").textContent !== timeFeedback)
           $("timeFeedback").textContent = timeFeedback;
+        const suggestionsTitle = $("slotSuggestionsTitle");
+        suggestionsTitle.hidden = available.length === 0;
+        suggestionsTitle.textContent = desired
+          ? "Horários livres mais próximos do horário digitado"
+          : "Primeiros horários livres do dia";
         for (const t of available.slice(0, 8)) {
-          const option = button(
+          button(
             "slots",
-            clock(t),
+            clock(t) + " até " + clock(t + length * min),
             null,
             t === slot,
             () => {
               $("preferredTime").value = new Date(t).toTimeString().slice(0, 5);
               slot = t;
               render();
+              if (!slot) $("preferredTime").focus();
             },
             "pill",
           );
-          option.setAttribute("aria-label", clock(t) + " até " + clock(t + length * min));
         }
         const summaryText =
-          name +
-          " · " +
-          length +
-          " min\n" +
-          money(price) +
-          "\n" +
-          shop.name +
-          " · " +
-          staff[barber] +
+          "Serviço: " + name + " · " + length + " min\n" +
+          "Valor ilustrativo: " + money(price) + "\n" +
+          "Barbearia: " + shop.name + "\nProfissional: " + staff[barber] +
           "\n" +
           (slot
             ? label(slot) +
@@ -1314,7 +1388,7 @@
               " · Término previsto: " +
               clock(slot + length * min)
             : validDate
-              ? "Escolha um horário"
+              ? label(at(day, "12:00")) + " · Escolha um horário"
               : "Escolha uma data válida");
         if ($("summary").textContent !== summaryText) $("summary").textContent = summaryText;
         $("confirm").disabled = !slot;
@@ -1325,8 +1399,9 @@
             null,
             null,
             () => {
-              $("customer").focus();
-              $("customer").scrollIntoView({
+              const customerInput = $("customer");
+              customerInput.focus({ preventScroll: true });
+              customerInput.scrollIntoView({
                 behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
                   ? "instant"
                   : "smooth",
@@ -1352,15 +1427,32 @@
             "aria-label",
             $(id).textContent + " · " + staff[barber] + " · " + shop.name,
           );
+        const bookingListTime = Date.now();
+        const isUpcoming = (reservation) =>
+          reservation.status === "confirmed" && reservation.start > bookingListTime;
+        const byUpcomingThenStart = (a, b) =>
+          Number(isUpcoming(b)) - Number(isUpcoming(a)) || a.start - b.start;
         const bookings = state.bookings
-          .filter((r) => inShop(r) && r.barber === staff[barber])
-          .sort((a, b) => a.start - b.start);
-        if (!bookings.length)
-          $("list").textContent =
+          .filter((reservation) => inShop(reservation) && reservation.barber === staff[barber])
+          .sort(byUpcomingThenStart);
+        const panelBookingsTitle = $("panelBookingsTitle");
+        const panelTitle = "Reservas de " + staff[barber] + " · " + shop.name;
+        if (panelBookingsTitle.textContent !== panelTitle)
+          panelBookingsTitle.textContent = panelTitle;
+        const panelBookings = $("list");
+        if (bookings.length) {
+          panelBookings.setAttribute("role", "list");
+          panelBookings.setAttribute("aria-labelledby", "panelBookingsTitle");
+        } else {
+          panelBookings.removeAttribute("role");
+          panelBookings.removeAttribute("aria-labelledby");
+          panelBookings.textContent =
             "Nenhuma reserva para " + staff[barber] + " em " + shop.name + ".";
+        }
         bookings.forEach((r) => {
           const row = document.createElement("div");
           row.className = "row";
+          row.setAttribute("role", "listitem");
           row.textContent =
             (r.serviceName ? r.serviceName + " · " : "") +
             label(r.start) +
@@ -1371,8 +1463,8 @@
             " · " +
             r.customer +
             " · " +
-            bookingStatus[r.status];
-          $("list").append(row);
+            bookingStatusLabel(r.status);
+          panelBookings.append(row);
           if (r.status === "confirmed") {
             const b = button("list", "Iniciar atendimento", null, null, () => start(r), "pill");
             b.disabled = !!p.active || !!p.absent;
@@ -1393,13 +1485,20 @@
           }
           row.append(chatButton(r, "barber"));
         });
-        $("myBookings").replaceChildren();
-        const mine = state.bookings.filter(inShop).sort((a, b) => a.start - b.start);
-        if (!mine.length)
-          $("myBookings").textContent = "Você ainda não tem reservas nesta barbearia.";
+        $("myBookingsShop").textContent = "Barbearia selecionada: " + shop.name;
+        const myBookings = $("myBookings");
+        myBookings.replaceChildren();
+        const mine = state.bookings.filter(inShop).sort(byUpcomingThenStart);
+        if (mine.length) {
+          myBookings.setAttribute("role", "list");
+        } else {
+          myBookings.removeAttribute("role");
+          myBookings.textContent = "Você ainda não tem reservas nesta barbearia.";
+        }
         for (const r of mine) {
           const row = document.createElement("div");
           row.className = "row";
+          row.setAttribute("role", "listitem");
           row.textContent =
             r.barber +
             " · " +
@@ -1410,8 +1509,8 @@
             " até " +
             clock(r.end) +
             " · " +
-            bookingStatus[r.status];
-          $("myBookings").append(row);
+            bookingStatusLabel(r.status);
+          myBookings.append(row);
           row.append(chatButton(r, "customer"));
           if (canChange(r)) {
             const context =
@@ -1455,7 +1554,13 @@
         }
       }
       $("professional").onchange = () => {
-        barber = Number($("professional").value);
+        const select = $("professional");
+        const index = Number(select.value);
+        if (select.value === "" || !Number.isInteger(index) || index < 0 || index >= staff.length || index === barber) {
+          select.value = String(barber);
+          return;
+        }
+        barber = index;
         slot = 0;
         render();
       };
@@ -1487,30 +1592,34 @@
         if (
           !canChange(r) ||
           !window.confirm(
-            "Cancelar sua reserva em " +
+            "Cancelar sua reserva" +
+              (r.serviceName ? " de " + r.serviceName : "") +
+              " em " +
               shop.name +
               " com " +
               r.barber +
               " no dia " +
               label(r.start) +
-              " às " +
+              " das " +
               clock(r.start) +
+              " às " +
+              clock(r.end) +
               "?",
           )
         )
           return;
+        if (!canChange(r)) {
+          const message = "Esta reserva já não pode ser cancelada.";
+          save(message);
+          speakVoice(message, "notice");
+          return;
+        }
         r.status = "cancelled";
-        save(
-          "Reserva cancelada em " +
-            shop.name +
-            " com " +
-            r.barber +
-            " no dia " +
-            label(r.start) +
-            " às " +
-            clock(r.start) +
-            ".",
-        );
+        const message =
+          "Reserva cancelada em " + shop.name + " com " + r.barber +
+          " no dia " + label(r.start) + " às " + clock(r.start) + ".";
+        save(message);
+        speakVoice(message, "notice");
       }
       function openReschedule(r) {
         if (!canReschedule(r)) {
@@ -1532,15 +1641,19 @@
           clock(r.start) +
           " às " +
           clock(r.end) +
-          ". Escolha a nova data e o novo horário. " +
+          ". Escolha a nova data e o novo horário. A reserva atual só muda depois da confirmação. " +
           rescheduleRule;
         const input = $("rescheduleDay");
-        const lastDay = new Date();
-        lastDay.setDate(lastDay.getDate() + 6);
-        input.min = today();
+        const firstDay = new Date();
+        const lastDay = new Date(firstDay);
+        lastDay.setDate(firstDay.getDate() + 6);
+        input.min = dateKey(firstDay);
         input.max = dateKey(lastDay);
+        $("rescheduleDateRange").textContent =
+          "Escolha uma data de " + label(firstDay) + " a " + label(lastDay) + ".";
         const originalDay = dateKey(new Date(r.start));
-        input.value = originalDay <= input.max ? originalDay : input.min;
+        input.value =
+          originalDay >= input.min && originalDay <= input.max ? originalDay : input.min;
         $("rescheduleSlot").value = "";
         renderRescheduleSlots();
         $("reschedule").showModal();
@@ -1548,8 +1661,10 @@
       }
       const expiredRescheduleText = "Prazo de remarcação encerrado. " + rescheduleRule;
       function renderRescheduleSlots() {
-        const r = bookingToMove,
-          input = $("rescheduleDay"),
+        const r = bookingToMove;
+        if (!r) return;
+
+        const input = $("rescheduleDay"),
           select = $("rescheduleSlot");
         const eligible = canReschedule(r);
         const date = input.value,
@@ -1565,7 +1680,7 @@
           }
         }
         const empty = !select.options.length;
-        select.add(new Option(empty ? "Sem horários disponíveis" : "Selecione um horário", ""), 0);
+        select.add(new Option(empty ? "Sem horários disponíveis" : "Escolha um novo horário", ""), 0);
         select.value = Array.from(select.options).some((option) => option.value === previous)
           ? previous
           : "";
@@ -1578,13 +1693,20 @@
               ? "Preencha uma data válida no período permitido. Sua reserva atual foi mantida."
               : state.shopClosed?.[shop.id]
                 ? "Esta barbearia está fechada para novas reservas e remarcações. Sua reserva atual foi mantida. Consulte novamente quando ela reabrir."
-                : "Escolha outra data para ver mais horários. Sua reserva atual foi mantida."
+                : index < 0 || profile(index).absent
+                  ? r.barber + " está indisponível para remarcações. Sua reserva atual foi mantida."
+                  : "Escolha outra data para ver mais horários. Sua reserva atual foi mantida."
           : "";
         const feedback = $("rescheduleFeedback");
         if (feedback.textContent !== feedbackText) feedback.textContent = feedbackText;
       }
       $("rescheduleDay").onchange = renderRescheduleSlots;
       $("rescheduleDay").oninput = renderRescheduleSlots;
+      $("rescheduleSlot").onchange = (event) => {
+        if (event.target.value && canReschedule(bookingToMove)) {
+          $("rescheduleFeedback").textContent = "";
+        }
+      };
       $("closeReschedule").onclick = () => $("reschedule").close();
       $("reschedule").onclose = () => {
         bookingToMove = undefined;
@@ -1599,6 +1721,8 @@
           duration = r.end - r.start;
         if (!canReschedule(r)) {
           renderRescheduleSlots();
+          $("closeReschedule").focus();
+          speakVoice($("rescheduleFeedback").textContent, "rescheduleFeedback");
           return;
         }
         if (
@@ -1609,31 +1733,35 @@
           !free(t, input.value, duration, index, r)
         ) {
           renderRescheduleSlots();
-          $("rescheduleFeedback").textContent =
-            "Este horário não está disponível. Confira a data e escolha outro horário. Sua reserva atual foi mantida.";
+          const feedback = $("rescheduleFeedback");
+          if (!feedback.textContent) {
+            feedback.textContent =
+              "Este horário não está disponível. Escolha outro horário. Sua reserva atual foi mantida.";
+          }
+          const slotInput = $("rescheduleSlot");
+          (slotInput.disabled ? input : slotInput).focus();
+          speakVoice(feedback.textContent, "rescheduleFeedback");
           return;
         }
         r.start = t;
         r.end = t + duration;
         $("reschedule").close();
-        save(
+        const message =
           "Reserva remarcada em " +
-            shop.name +
-            " com " +
-            r.barber +
-            " para " +
-            label(t) +
-            " às " +
-            clock(t) +
-            ".",
-        );
+          shop.name +
+          " com " +
+          r.barber +
+          " para " +
+          label(t) + " das " + clock(t) + " às " + clock(r.end) + ".";
+        save(message);
+        speakVoice(message, "notice");
       };
       let conversation;
       const quickReplies = [
         ["Confirmar horário", "Olá! Seu horário está confirmado. Até logo!"],
         ["Avisar atraso", "Olá! Estou com um pequeno atraso. Obrigado pela paciência."],
         ["Já pode vir", "Olá! Já estou pronto para te atender. Pode vir!"],
-        ["Remarcar", "Olá! Podemos combinar outro horário? Qual fica melhor para você?"],
+        ["Sugerir remarcação", "Olá! Podemos combinar outro horário? Qual fica melhor para você?"],
         ["Agradecer", "Obrigado pela visita! Até a próxima."],
       ];
       for (const [title, message] of quickReplies) {
@@ -1790,6 +1918,8 @@
             " da reserva de " +
             (role === "barber" ? reservation.customer : reservation.barber) +
             " em " +
+            shop.name +
+            ", no dia " +
             label(reservation.start) +
             " às " +
             clock(reservation.start),
@@ -1860,6 +1990,9 @@
           e.preventDefault();
           $("messageText").focus();
         }
+      };
+      $("messageText").oninput = () => {
+        $("chatFeedback").textContent = "";
       };
       $("sendMessage").onsubmit = (e) => {
         e.preventDefault();
@@ -1956,9 +2089,15 @@
           return;
         }
         if (!slot || !free(slot)) {
+          const message = slot
+            ? "O horário escolhido deixou de estar disponível. Confira os horários atualizados."
+            : "Escolha um horário livre para confirmar sua reserva.";
           render();
-          $("notice").textContent = "Escolha um horário livre para confirmar sua reserva.";
-          $("notice").focus();
+          $("notice").textContent = message;
+          speakVoice(message, "notice");
+          const date = $("bookingDate");
+          const target = date.value && date.validity.valid ? $("preferredTime") : date;
+          target.focus();
           return;
         }
         const reservation = {
@@ -1974,19 +2113,24 @@
         state.bookings.push(reservation);
         scheduleDemoReply(reservation, "Olá! Sua reserva está confirmada. Até o seu horário!");
         const msg =
-          "Reserva confirmada em " +
+          "Reserva de teste confirmada. " +
+          reservation.serviceName +
+          " em " +
           shop.name +
           " com " +
-          staff[barber] +
+          reservation.barber +
           " no dia " +
-          label(slot) +
+          label(reservation.start) +
+          ", das " +
+          clock(reservation.start) +
           " às " +
-          clock(slot) +
+          clock(reservation.end) +
           ".";
         slot = 0;
         $("preferredTime").value = "";
         e.target.reset();
         save(msg);
+        speakVoice(msg, "notice");
       };
       $("cut").onclick = () => {
         const p = profile();
@@ -2013,7 +2157,7 @@
         )
           return;
         p.pause = now + 30 * min;
-        save("Intervalo iniciado.");
+        save("Intervalo iniciado até " + clock(pauseEnd(p, now)) + ".");
       };
       $("toggle").onclick = () => {
         const show = $("panel").hidden;
@@ -2029,6 +2173,35 @@
       };
       const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       let listening;
+      const audioControl = $("enableAudio");
+      function speakVoice(message, statusId = "voiceStatus") {
+       if (audioControl.getAttribute("aria-pressed") !== "true") return;
+       const reply = new window.SpeechSynthesisUtterance(message);
+       reply.lang = "pt-BR";
+       reply.onerror = (event) => {
+         const status = $(statusId);
+         if (event.error !== "canceled" && event.error !== "interrupted" &&
+             status.textContent === message && !listening)
+           status.textContent += " Não foi possível reproduzir a resposta em áudio.";
+       };
+       window.speechSynthesis.speak(reply);
+      }
+      audioControl.onclick = () => {
+       if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
+         voiceNotice("Este navegador não oferece leitura em voz alta. Você pode usar o teclado ou um leitor de tela.");
+         return;
+       }
+       const enabled = audioControl.getAttribute("aria-pressed") === "true";
+       audioControl.setAttribute("aria-pressed", String(!enabled));
+       if (enabled) {
+         window.speechSynthesis.cancel();
+         voiceNotice("Leitura em voz alta desativada.");
+         return;
+       }
+       const message = "Leitura em voz alta ativada. Para agendar, escolha a barbearia, o serviço, o barbeiro, a data e o horário. Você também pode usar o botão Voz para navegar por comandos.";
+       voiceNotice(message);
+       speakVoice(message);
+      };
       function voiceNotice(message) {
         $("voiceStatus").textContent = message;
       }
@@ -2038,13 +2211,15 @@
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
           .replace(/[.!?]/g, "")
-          .trim();
+          .trim()
+          .replace(/\s+/g, " ");
         const destinations = {
           barbearias: "shop",
           servicos: "services",
           barbeiros: "staff",
           data: "bookingDate",
-          horarios: "days",
+          horarios: "preferredTime",
+          "meu nome": "customer",
           "minhas reservas": "myBookings",
           "painel do barbeiro": "panel",
         };
@@ -2074,7 +2249,11 @@
         const recognition = new Recognition();
         recognition.lang = "pt-BR";
         recognition.interimResults = false;
-        recognition.onresult = (e) => voiceNavigate(e.results[0][0].transcript);
+        let spokenFeedback = "";
+        recognition.onresult = (e) => {
+          voiceNavigate(e.results[0][0].transcript);
+          spokenFeedback = $("voiceStatus").textContent;
+        };
         recognition.onerror = (e) => {
           if (e.error !== "aborted")
             voiceNotice(
@@ -2087,6 +2266,7 @@
           listening = null;
           $("voice").setAttribute("aria-pressed", "false");
           $("voice").textContent = "🎙 Voz";
+          if (spokenFeedback) speakVoice(spokenFeedback);
         };
         try {
           recognition.start();
@@ -2102,6 +2282,7 @@
         prepareDemo();
         $("bookingDate").value = day;
         render();
+        $("guestEntry").disabled = false;
         $("bootStatus").hidden = true;
         setInterval(refreshDemo, 1000);
         document.addEventListener("visibilitychange", () => {
