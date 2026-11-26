@@ -2115,6 +2115,7 @@
             pendingDemoReplies.delete(reservation);
             if (!chatOpen(reservation) || reservation.start <= Date.now()) return;
             (reservation.messages ??= []).push({ role: "barber", automated: true, text });
+            storeDemoState();
             if ($("chat").open && conversation?.reservation === reservation) renderChat();
           },
           2500 + Math.random() * 5000,
@@ -2761,6 +2762,7 @@
           return;
         }
         (conversation.reservation.messages ??= []).push({ role: conversation.role, text });
+        storeDemoState();
         if (conversation.role === "customer") {
           const r = conversation.reservation;
           scheduleDemoReply(
