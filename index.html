@@ -2419,7 +2419,7 @@ function renderRescheduleSlots() {
           action.dataset.cashRecordId = record.id;
           const cash = record.paymentMethod === "cash_demo";
           action.textContent = cash ? "Desfazer dinheiro" : "Registrar dinheiro";
-          action.setAttribute("aria-label", action.textContent + " · " + record.barber + " · " + record.serviceName + " · " + clock(record.end));
+          action.setAttribute("aria-label", action.textContent + " · " + managementRecordContext(record));
           action.onclick = () => cash ? undoCashRecord(record.id) : openCashRecord(record.id);
           actionCell.append(action); row.append(actionCell);
           $("managementLog").append(row);
@@ -2466,12 +2466,16 @@ function renderRescheduleSlots() {
         const entry = ownedShop();
         return entry && managementData.entries.find((record) => record.id === id && record.shopId === entry.id);
       }
-      function openCashRecord(id) {
+            function managementRecordContext(record) {
+        return record.barber + " · " + record.serviceName + " · " + money(record.price) +
+          " · " + label(record.start) + " das " + clock(record.start) + " às " + clock(record.end);
+      }
+function openCashRecord(id) {
         const record = editableCashRecord(id);
         if (!record || record.paymentMethod === "cash_demo") return;
         cashRecordId = id;
         $("cashForm").hidden = false;
-        $("cashContext").textContent = record.barber + " · " + record.serviceName + " · " + money(record.price);
+        $("cashContext").textContent = managementRecordContext(record);
         $("cashReceived").value = "";
         $("cashReceived").removeAttribute("aria-invalid");
         $("cashConfirmed").checked = false;
