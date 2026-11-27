@@ -2462,6 +2462,7 @@ function renderRescheduleSlots() {
         $("cashForm").hidden = false;
         $("cashContext").textContent = record.barber + " · " + record.serviceName + " · " + money(record.price);
         $("cashReceived").value = "";
+        $("cashReceived").removeAttribute("aria-invalid");
         $("cashConfirmed").checked = false;
         $("cashChange").textContent = "Informe quanto o cliente entregou em dinheiro.";
         $("cashFeedback").textContent = "";
@@ -2494,6 +2495,7 @@ function renderRescheduleSlots() {
       $("cashReceived").oninput = () => {
         const record = editableCashRecord(cashRecordId);
         const amounts = record && cashAmounts(record.price, $("cashReceived").value);
+        $("cashReceived").setAttribute("aria-invalid", String(!!$("cashReceived").value && !amounts));
         $("cashChange").textContent = amounts
           ? "Troco de " + money(amounts.changeCents / 100) + "."
           : "Informe um valor igual ou maior que o serviço, com até duas casas decimais.";
@@ -2506,8 +2508,15 @@ function renderRescheduleSlots() {
           return;
         }
         const amounts = cashAmounts(record.price, $("cashReceived").value);
-        if (!amounts || !$("cashConfirmed").checked) {
-          $("cashFeedback").textContent = "Confira o valor e confirme o recebimento de teste.";
+        if (!amounts) {
+          $("cashFeedback").textContent = "Informe um valor igual ou maior que o serviço, com até duas casas decimais.";
+          $("cashReceived").setAttribute("aria-invalid", "true");
+          $("cashReceived").focus();
+          return;
+        }
+        if (!$("cashConfirmed").checked) {
+          $("cashFeedback").textContent = "Confirme o recebimento de teste antes de registrar.";
+          $("cashConfirmed").focus();
           return;
         }
         const replacement = { ...record, paymentMethod: "cash_demo", ...amounts,
