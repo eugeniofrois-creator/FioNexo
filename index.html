@@ -1986,7 +1986,12 @@
         input.focus();
       }
       const expiredRescheduleText = "Prazo de remarcação encerrado. " + rescheduleRule;
-      function renderRescheduleSlots() {
+            function updateRescheduleConfirmation() {
+        const selection = $("rescheduleSlot");
+        $("rescheduleConfirm").disabled = selection.disabled || !selection.value ||
+          !bookingToMove || !canReschedule(bookingToMove);
+      }
+function renderRescheduleSlots() {
         const r = bookingToMove;
         if (!r) return;
 
@@ -2011,7 +2016,7 @@
           ? previous
           : "";
         select.disabled = empty;
-        $("rescheduleConfirm").disabled = empty;
+        updateRescheduleConfirmation();
         const feedbackText = empty
           ? !eligible
             ? expiredRescheduleText
@@ -2029,6 +2034,7 @@
       $("rescheduleDay").onchange = renderRescheduleSlots;
       $("rescheduleDay").oninput = renderRescheduleSlots;
       $("rescheduleSlot").onchange = (event) => {
+        updateRescheduleConfirmation();
         if (event.target.value && canReschedule(bookingToMove)) {
           $("rescheduleFeedback").textContent = "";
         }
