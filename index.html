@@ -2882,6 +2882,20 @@ function renderRescheduleSlots() {
         );
       }
       $("customer").oninput = () => $("customer").setCustomValidity("");
+      function createReservation(customer, start) {
+        const [serviceName, duration, price] = services[service];
+        return {
+          id: createBookingId(),
+          shopId: shop.id,
+          barber: staff[barber],
+          customer,
+          serviceName,
+          price,
+          start,
+          end: start + duration * min,
+          status: "confirmed",
+        };
+      }
       $("reserve").onsubmit = (e) => {
         e.preventDefault();
         slot = requestedSlot();
@@ -2905,17 +2919,7 @@ function renderRescheduleSlots() {
           target.focus();
           return;
         }
-        const reservation = {
-          id: createBookingId(),
-          shopId: shop.id,
-          barber: staff[barber],
-          customer,
-          serviceName: services[service][0],
-          price: services[service][2],
-          start: slot,
-          end: slot + services[service][1] * min,
-          status: "confirmed",
-        };
+        const reservation = createReservation(customer, slot);
         state.bookings.push(reservation);
         scheduleDemoReply(reservation, "Olá! Sua reserva está confirmada. Até o seu horário!");
         const msg =
