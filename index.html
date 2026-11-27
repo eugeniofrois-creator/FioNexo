@@ -1115,6 +1115,11 @@
     <script>
       const $ = (id) => document.getElementById(id),
         min = 60000;
+      const initialPageTitle = document.title;
+      function updatePageTitle() {
+        const title = $("mainContent").hidden ? initialPageTitle : shop.name + " · FioNexo";
+        if (document.title !== title) document.title = title;
+      }
       const guestViewKey = "fionexo:guest-view";
       function showAgenda(open, moveFocus = true) {
         if (!open) {
@@ -1129,6 +1134,7 @@
         }
         $("home").hidden = open;
         $("mainContent").hidden = !open;
+        updatePageTitle();
         $("agendaControls").hidden = !open;
         $("skipContent").href = open ? "#mainContent" : "#home";
         if (moveFocus) $(open ? "agendaTitle" : "guestEntry").focus();
@@ -1516,6 +1522,7 @@
         return { color: "yellow", text: "Aberta · Nenhum barbeiro disponível agora" };
       }
       function renderShopStatus() {
+        updatePageTitle();
         const now = Date.now();
         const availability = shopAvailability(shop, now),
           container = $("shopStatus");
