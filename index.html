@@ -675,7 +675,13 @@
       .management-chart { display: grid; gap: 12px; }
       .management-bar { height: 14px; background: #eee3d6; border-radius: 7px; overflow: hidden; }
       .management-bar span { display: block; height: 100%; background: #97472e; }
-      .management-table { overflow-x: auto; margin-top: 20px; }
+      .management-table { overflow: auto; max-height: 55vh; margin-top: 20px; }
+      .management-table:focus-visible { outline: 3px solid var(--fn-accent, #97472e); outline-offset: 3px; }
+      #management thead th { position: sticky; top: 0; z-index: 1; background: var(--fn-surface, #fffaf2); }
+      @media (forced-colors: active) {
+        #management thead th { background: Canvas; }
+        .management-table:focus-visible { outline-color: Highlight; }
+      }
       #management table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
       #management th, #management td { text-align: left; padding: 12px 8px; border-bottom: 1px solid #cfbfb0; vertical-align: top; }
 
