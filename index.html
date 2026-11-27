@@ -1291,7 +1291,13 @@
       const state = { bookings: [], staff: Object.create(null), shopClosed: Object.create(null) };
       let demoBookingSequence = 0;
       function createBookingId() {
-        return globalThis.crypto?.randomUUID?.() ?? "demo-" + ++demoBookingSequence;
+        const uuid = globalThis.crypto?.randomUUID?.();
+        if (uuid) return uuid;
+        let id;
+        do {
+          id = "demo-" + ++demoBookingSequence;
+        } while (state.bookings.some((reservation) => reservation.id === id));
+        return id;
       }
 
       const dateKey = (d) => new Date(+d - d.getTimezoneOffset() * min).toISOString().slice(0, 10);
