@@ -2637,6 +2637,7 @@
           shopStatusPending = true;
         }
         lastDemoMinute = currentMinute;
+        syncChatAvailability();
         if (
           $("reschedule").open &&
           bookingToMove &&
@@ -2709,6 +2710,20 @@
         };
         return btn;
       }
+      function syncChatAvailability() {
+        if (!$("chat").open || !conversation) return;
+        const available = chatOpen(conversation.reservation);
+        const form = $("sendMessage"), quick = $("quickReplies");
+        if (form.hidden === !available) return;
+        const moveFocus = !available &&
+          (form.contains(document.activeElement) || quick.contains(document.activeElement));
+        form.hidden = !available;
+        quick.hidden = conversation.role !== "barber" || !available;
+        if (!available) {
+          $("chatFeedback").textContent = "Chat encerrado. O histórico fica disponível para consulta.";
+          if (moveFocus) $("closeChat").focus();
+        }
+      }
       function renderChat(showLatest = false) {
         // v16: preserve mensagens existentes para anunciar apenas as novas no leitor de tela.
         const list = $("messages"),
@@ -2760,6 +2775,7 @@
       $("sendMessage").onsubmit = (e) => {
         e.preventDefault();
         const text = $("messageText").value.trim();
+        syncChatAvailability();
         if (!conversation || !chatOpen(conversation.reservation)) return;
         if (!text) {
           $("chatFeedback").textContent =
