@@ -2545,6 +2545,7 @@ function openCashRecord(id) {
         closeCashRecord();
         $("cashFeedback").textContent = "Dinheiro registrado na demonstração. Serviço de " + money(record.price) +
           ", recebido " + money(amounts.receivedCents / 100) + ", troco " + money(amounts.changeCents / 100) + ".";
+        speakVoice($("cashFeedback").textContent, "cashFeedback", $("cashFeedback"));
       };
       function undoCashRecord(id) {
         const record = editableCashRecord(id);
@@ -2555,6 +2556,7 @@ function openCashRecord(id) {
         closeCashRecord();
         focusCashAction(id);
         $("cashFeedback").textContent = "Registro em dinheiro desfeito. O atendimento continua no histórico demonstrativo.";
+        speakVoice($("cashFeedback").textContent, "cashFeedback", $("cashFeedback"));
       }
       $("cancelCash").onclick = closeCashRecord;
       $("management").addEventListener("close", closeCashRecord);
