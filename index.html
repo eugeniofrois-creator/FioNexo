@@ -1928,7 +1928,7 @@
       let bookingToMove;
       function cancelBooking(r) {
         if (
-          !canChange(r) ||
+          canChange(r) &&
           !window.confirm(
             "Cancelar sua reserva" +
               (r.serviceName ? " de " + r.serviceName : "") +
