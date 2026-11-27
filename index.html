@@ -2049,8 +2049,12 @@ function renderRescheduleSlots() {
       $("rescheduleDay").oninput = renderRescheduleSlots;
       $("rescheduleSlot").onchange = (event) => {
         updateRescheduleConfirmation();
-        if (event.target.value && canReschedule(bookingToMove)) {
+        if (!$("rescheduleConfirm").disabled) {
           $("rescheduleFeedback").textContent = "";
+          announceSelection(
+            "Novo horário selecionado. " + label(at($("rescheduleDay").value, "12:00")) +
+            ", " + selectedOptionText(event.target) + ". Confirme para remarcar."
+          );
         }
       };
       $("closeReschedule").onclick = () => $("reschedule").close();
