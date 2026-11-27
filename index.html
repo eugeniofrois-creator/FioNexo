@@ -815,6 +815,7 @@
         </div>
       </nav>
     </header>
+    <p class="wrap save-warning" id="agendaSaveWarning" role="alert" hidden></p>
     <main id="home" class="intro" tabindex="-1" aria-labelledby="homeTitle">
       <div class="wrap intro-grid">
         <div>
@@ -2152,10 +2153,15 @@ function renderRescheduleSlots() {
       }
       const demoStateKey = "fionexo:demo-operation:v1";
       function storeDemoState() {
+        const warning = $("agendaSaveWarning");
         try {
           sessionStorage.setItem(demoStateKey, JSON.stringify(state));
+          warning.hidden = true;
+          warning.textContent = "";
         } catch {
-          // The demo can still run in memory.
+          warning.hidden = false;
+          const message = "O navegador não permitiu salvar a agenda de teste. As alterações desta aba podem ser perdidas ao recarregar.";
+          if (warning.textContent !== message) warning.textContent = message;
         }
       }
       function restoreDemoState() {
