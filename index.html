@@ -2625,6 +2625,7 @@
         }
       }
       function refreshDemo() {
+        if (document.hidden) return;
         const now = Date.now(),
           currentMinute = Math.floor(now / min);
         const changed = advanceDemo(now);
