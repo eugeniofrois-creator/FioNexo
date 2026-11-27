@@ -1393,6 +1393,11 @@
       };
       const bookingStatusLabel = (status) =>
         Object.hasOwn(bookingStatus, status) ? bookingStatus[status] : "Status indisponível";
+      function reservationPriceLabel(reservation) {
+        return typeof reservation.price === "number" && Number.isFinite(reservation.price) && reservation.price >= 0
+          ? "Valor ilustrativo: " + money(reservation.price)
+          : "Valor não registrado";
+      }
       const rescheduleLeadTime = 4 * 60 * min;
       const canReschedule = (r) => canChange(r) && r.start - Date.now() >= rescheduleLeadTime;
       const rescheduleRule =
@@ -1779,7 +1784,7 @@
             " · " +
             r.customer +
             " · " +
-            bookingStatusLabel(r.status);
+            bookingStatusLabel(r.status) + " · " + reservationPriceLabel(r);
           panelBookings.append(row);
           if (r.status === "confirmed") {
             const b = button("list", "Iniciar atendimento", null, null, () => start(r), "pill");
@@ -1825,7 +1830,7 @@
             " até " +
             clock(r.end) +
             " · " +
-            bookingStatusLabel(r.status);
+            bookingStatusLabel(r.status) + " · " + reservationPriceLabel(r);
           myBookings.append(row);
           row.append(chatButton(r, "customer"));
           if (canChange(r)) {
