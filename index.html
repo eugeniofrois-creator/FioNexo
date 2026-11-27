@@ -1408,6 +1408,11 @@
       };
       const bookingStatusLabel = (status) =>
         Object.hasOwn(bookingStatus, status) ? bookingStatus[status] : "Status indisponível";
+      function reservationServiceLabel(reservation) {
+        return typeof reservation.serviceName === "string" && reservation.serviceName.trim()
+          ? reservation.serviceName.trim()
+          : "Serviço não registrado";
+      }
       function reservationPriceLabel(reservation) {
         return typeof reservation.price === "number" && Number.isFinite(reservation.price) && reservation.price >= 0
           ? "Valor ilustrativo: " + money(reservation.price)
@@ -1793,7 +1798,7 @@
           row.className = "row";
           row.setAttribute("role", "listitem");
           row.textContent =
-            (r.serviceName ? r.serviceName + " · " : "") +
+            (reservationServiceLabel(r) + " · ") +
             label(r.start) +
             " · " +
             clock(r.start) +
@@ -1841,7 +1846,7 @@
           row.textContent =
             r.barber +
             " · " +
-            (r.serviceName ? r.serviceName + " · " : "") +
+            (reservationServiceLabel(r) + " · ") +
             label(r.start) +
             " às " +
             clock(r.start) +
