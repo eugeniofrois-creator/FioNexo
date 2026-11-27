@@ -2913,7 +2913,7 @@
           clock(reservation.start) +
           " às " +
           clock(reservation.end) +
-          ".";
+          ". " + reservationPriceLabel(reservation) + ". Esta reserva de teste não gera cobrança.";
         slot = 0;
         $("preferredTime").value = "";
         e.target.reset();
