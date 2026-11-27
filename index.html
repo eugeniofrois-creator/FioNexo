@@ -2493,6 +2493,11 @@ function openCashRecord(id) {
         const previousRecordId = cashRecordId;
         cashRecordId = null;
         $("cashForm").hidden = true;
+        $("cashReceived").value = "";
+        $("cashReceived").removeAttribute("aria-invalid");
+        $("cashConfirmed").checked = false;
+        $("cashChange").textContent = "";
+        $("cashContext").textContent = "";
         if (previousRecordId && restoreFocus) focusCashAction(previousRecordId);
       }
       function commitCashRecord(record, replacement) {
