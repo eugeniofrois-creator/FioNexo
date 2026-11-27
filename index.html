@@ -1980,7 +1980,7 @@
           " das " +
           clock(r.start) +
           " às " +
-          clock(r.end) +
+          clock(r.end) + " · " + reservationPriceLabel(r) +
           ". Escolha a nova data e o novo horário. A reserva atual só muda depois da confirmação. " +
           rescheduleRule;
         const input = $("rescheduleDay");
