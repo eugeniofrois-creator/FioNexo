@@ -1674,6 +1674,9 @@
             : "Este horário não está livre. Escolha uma sugestão abaixo.";
         if ($("timeFeedback").textContent !== timeFeedback)
           $("timeFeedback").textContent = timeFeedback;
+        const timeInput = $("preferredTime");
+        const invalidTime = !timeInput.validity.valid || (validDate && !!timeInput.value && !slot);
+        timeInput.setAttribute("aria-invalid", String(invalidTime));
         const suggestionsTitle = $("slotSuggestionsTitle");
         suggestionsTitle.hidden = available.length === 0;
         suggestionsTitle.textContent = desired
