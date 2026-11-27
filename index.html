@@ -2738,14 +2738,10 @@ function openCashRecord(id) {
           conversation = { reservation, role };
           $("quickReplies").hidden = role !== "barber" || !chatOpen(reservation);
           $("sendMessage").hidden = !chatOpen(reservation);
-          $("chatInfo").textContent =
-            shop.name +
-            " · " +
-            reservation.barber +
-            " · " +
-            label(reservation.start) +
-            " às " +
-            clock(reservation.start);
+          $("chatInfo").textContent = shop.name + " · " + reservation.barber +
+            " · " + (reservation.serviceName || "Serviço não registrado") +
+            " · " + reservationPriceLabel(reservation) + " · " + label(reservation.start) +
+            " das " + clock(reservation.start) + " às " + clock(reservation.end);
           $("messageText").value = "";
           $("chatFeedback").textContent = chatOpen(reservation)
             ? ""
