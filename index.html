@@ -985,7 +985,7 @@
           <h3 id="teamTitle">Equipe da barbearia</h3>
           <form id="teamForm">
             <label for="teamName">Nome do profissional</label>
-            <input id="teamName" required maxlength="60" autocomplete="off">
+            <input id="teamName" required maxlength="60" autocomplete="off" aria-describedby="teamFeedback">
             <button class="cta" type="submit">Cadastrar barbeiro</button>
           </form>
           <p id="teamFeedback" role="status"></p>
@@ -2625,6 +2625,10 @@ function openCashRecord(id) {
           : name + " restaurado na equipe.";
         $("teamName").focus();
       }
+      $("teamName").oninput = () => {
+        $("teamName").removeAttribute("aria-invalid");
+        $("teamFeedback").textContent = "";
+      };
       $("teamForm").onsubmit = (event) => {
         event.preventDefault();
         const entry = ownedShop();
@@ -2632,10 +2636,14 @@ function openCashRecord(id) {
         const name = $("teamName").value.trim().replace(/\s+/g, " ");
         if (!name || name.length > 60 || ["__proto__", "constructor", "prototype"].includes(name)) {
           $("teamFeedback").textContent = "Use um nome de 1 a 60 caracteres.";
+          $("teamName").setAttribute("aria-invalid", "true");
+          $("teamName").focus();
           return;
         }
         if (entry.staff.some((item) => item.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) {
           $("teamFeedback").textContent = "Esse profissional já está cadastrado. Use Restaurar se ele foi removido.";
+          $("teamName").setAttribute("aria-invalid", "true");
+          $("teamName").focus();
           return;
         }
         const next = [...rosterChanges, { shopId: entry.id, name, joinedAt: Date.now(), removedAt: null }];
@@ -2643,6 +2651,7 @@ function openCashRecord(id) {
         entry.staff.push(name);
         refreshTeamAgenda();
         $("teamName").value = "";
+        $("teamName").removeAttribute("aria-invalid");
         $("teamFeedback").textContent = name + " cadastrado na barbearia.";
         $("teamName").focus();
       };
