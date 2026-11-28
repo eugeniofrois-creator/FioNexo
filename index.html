@@ -1511,7 +1511,9 @@
           return;
         }
         $("notice").textContent =
-          "Próximo horário com " + staff[barber] + ": " + label(slot) + " às " + clock(slot) + ".";
+          "Horário selecionado com " + staff[barber] + " em " + shop.name + ": " +
+          label(slot) + " às " + clock(slot) +
+          ". Confira o resumo e toque em Confirmar reserva para concluir.";
         $("slots").querySelector("[aria-pressed=true]")?.focus();
       }
       function shopAvailability(entry, now) {
