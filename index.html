@@ -2323,7 +2323,8 @@ function renderRescheduleSlots() {
         }
         const rows = [
           ["Barbearia", "Dia", "Profissional", "Serviço", "Início (UTC)", "Fim (UTC)", "Valor do serviço",
-           "Pagamento", "Dinheiro entregue", "Troco", "Registrado por", "Origem", "Tipo"],
+           "Pagamento", "Dinheiro entregue", "Troco", "Registrado por", "Origem", "Tipo",
+           "Data e início (fuso do navegador)", "Data e fim (fuso do navegador)"],
           ...records.slice().sort((a, b) => a.end - b.end).map((record) => [
             entry.name, dateInput.value, record.barber, record.serviceName,
             new Date(record.start).toISOString(), new Date(record.end).toISOString(),
@@ -2331,7 +2332,8 @@ function renderRescheduleSlots() {
             record.paymentMethod === "cash_demo" ? "Dinheiro demonstrativo" : "Pagamento demonstrativo",
             record.paymentMethod === "cash_demo" ? (record.receivedCents / 100).toFixed(2).replace(".", ",") : "",
             record.paymentMethod === "cash_demo" ? (record.changeCents / 100).toFixed(2).replace(".", ",") : "",
-            record.cashRecordedBy || "", record.source, "Demonstração"
+            record.cashRecordedBy || "", record.source, "Demonstração",
+            label(record.start) + " " + clock(record.start), label(record.end) + " " + clock(record.end)
           ])
         ];
         const url = URL.createObjectURL(new Blob([csvRows(rows)], { type: "text/csv;charset=utf-8" }));
