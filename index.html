@@ -2111,12 +2111,9 @@ function renderRescheduleSlots() {
         r.end = t + duration;
         $("reschedule").close();
         const message =
-          "Reserva remarcada em " +
-          shop.name +
-          " com " +
-          r.barber +
-          " para " +
-          label(t) + " das " + clock(t) + " às " + clock(r.end) + ".";
+          "Reserva remarcada em " + shop.name + " com " + r.barber +
+          " para " + label(t) + " das " + clock(t) + " às " + clock(r.end) +
+          ". " + reservationServiceLabel(r) + ". " + reservationPriceLabel(r) + ".";
         save(message);
         speakVoice(message, "notice");
       };
