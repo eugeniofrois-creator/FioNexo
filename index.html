@@ -1585,8 +1585,85 @@
         $("preferredTime").focus();
         speakVoice(message, "timeFeedback", $("timeFeedback"));
       };
+      function bookingComparator() {
+const bookingListTime = Date.now();
+        const isUpcoming = (reservation) =>
+          reservation.status === "confirmed" && reservation.start > bookingListTime;
+        return (a, b) =>
+          Number(isUpcoming(b)) - Number(isUpcoming(a)) || a.start - b.start;
+}
+function renderMyBookings(byUpcomingThenStart = bookingComparator()) {
+$("myBookingsShop").textContent = "Barbearia selecionada: " + shop.name;
+        const myBookings = $("myBookings");
+        myBookings.replaceChildren();
+        const mine = state.bookings.filter(inShop).sort(byUpcomingThenStart);
+        if (mine.length) {
+          myBookings.setAttribute("role", "list");
+        } else {
+          myBookings.removeAttribute("role");
+          myBookings.textContent = "Você ainda não tem reservas nesta barbearia.";
+        }
+        for (const r of mine) {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.setAttribute("role", "listitem");
+          row.textContent =
+            r.barber +
+            " · " +
+            (reservationServiceLabel(r) + " · ") +
+            label(r.start) +
+            " às " +
+            clock(r.start) +
+            " até " +
+            clock(r.end) +
+            " · " +
+            bookingStatusLabel(r.status) + " · " + reservationPriceLabel(r);
+          myBookings.append(row);
+          row.append(chatButton(r, "customer"));
+          if (canChange(r)) {
+            const context =
+              " com " +
+              r.barber +
+              " em " +
+              shop.name +
+              " no dia " +
+              label(r.start) +
+              " às " +
+              clock(r.start);
+            const move = button(
+              "myBookings",
+              "Remarcar",
+              null,
+              null,
+              () => openReschedule(r),
+              "pill",
+            );
+            const eligible = canReschedule(r);
+            const rule = document.createElement("small");
+            rule.id = "reschedule-rule-" + r.id;
+            rule.textContent = eligible
+              ? rescheduleRule
+              : "Prazo de remarcação encerrado. É necessário remarcar com pelo menos 4 horas de antecedência.";
+            move.setAttribute("aria-label", "Remarcar reserva" + context);
+            move.setAttribute("aria-describedby", rule.id);
+            move.disabled = !eligible;
+            row.append(move, rule);
+            const cancel = button(
+              "myBookings",
+              "Cancelar reserva",
+              null,
+              null,
+              () => cancelBooking(r),
+              "pill",
+            );
+            cancel.setAttribute("aria-label", "Cancelar reserva" + context);
+            row.append(cancel);
+          }
+        }
+}
       function renderEmptyStaff() {
         renderShopStatus();
+        renderMyBookings();
         for (const id of ["staff", "panelStaff", "professional", "slots", "list"]) $(id).replaceChildren();
         $("summary").textContent = "Esta barbearia está sem profissionais cadastrados.";
         $("timeFeedback").textContent = "O responsável pode cadastrar profissionais na Área da barbearia.";
@@ -1789,11 +1866,7 @@
             "aria-label",
             $(id).textContent + " · " + staff[barber] + " · " + shop.name,
           );
-        const bookingListTime = Date.now();
-        const isUpcoming = (reservation) =>
-          reservation.status === "confirmed" && reservation.start > bookingListTime;
-        const byUpcomingThenStart = (a, b) =>
-          Number(isUpcoming(b)) - Number(isUpcoming(a)) || a.start - b.start;
+        const byUpcomingThenStart = bookingComparator();
         const bookings = state.bookings
           .filter((reservation) => inShop(reservation) && reservation.barber === staff[barber])
           .sort(byUpcomingThenStart);
@@ -1847,73 +1920,7 @@
           }
           row.append(chatButton(r, "barber"));
         });
-        $("myBookingsShop").textContent = "Barbearia selecionada: " + shop.name;
-        const myBookings = $("myBookings");
-        myBookings.replaceChildren();
-        const mine = state.bookings.filter(inShop).sort(byUpcomingThenStart);
-        if (mine.length) {
-          myBookings.setAttribute("role", "list");
-        } else {
-          myBookings.removeAttribute("role");
-          myBookings.textContent = "Você ainda não tem reservas nesta barbearia.";
-        }
-        for (const r of mine) {
-          const row = document.createElement("div");
-          row.className = "row";
-          row.setAttribute("role", "listitem");
-          row.textContent =
-            r.barber +
-            " · " +
-            (reservationServiceLabel(r) + " · ") +
-            label(r.start) +
-            " às " +
-            clock(r.start) +
-            " até " +
-            clock(r.end) +
-            " · " +
-            bookingStatusLabel(r.status) + " · " + reservationPriceLabel(r);
-          myBookings.append(row);
-          row.append(chatButton(r, "customer"));
-          if (canChange(r)) {
-            const context =
-              " com " +
-              r.barber +
-              " em " +
-              shop.name +
-              " no dia " +
-              label(r.start) +
-              " às " +
-              clock(r.start);
-            const move = button(
-              "myBookings",
-              "Remarcar",
-              null,
-              null,
-              () => openReschedule(r),
-              "pill",
-            );
-            const eligible = canReschedule(r);
-            const rule = document.createElement("small");
-            rule.id = "reschedule-rule-" + r.id;
-            rule.textContent = eligible
-              ? rescheduleRule
-              : "Prazo de remarcação encerrado. É necessário remarcar com pelo menos 4 horas de antecedência.";
-            move.setAttribute("aria-label", "Remarcar reserva" + context);
-            move.setAttribute("aria-describedby", rule.id);
-            move.disabled = !eligible;
-            row.append(move, rule);
-            const cancel = button(
-              "myBookings",
-              "Cancelar reserva",
-              null,
-              null,
-              () => cancelBooking(r),
-              "pill",
-            );
-            cancel.setAttribute("aria-label", "Cancelar reserva" + context);
-            row.append(cancel);
-          }
-        }
+        renderMyBookings(byUpcomingThenStart);
       }
       $("professional").onchange = () => {
         const select = $("professional");
