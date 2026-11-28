@@ -673,6 +673,8 @@
       .management-metrics p { padding: 16px; border: 1px solid #cfbfb0; border-radius: 12px; margin: 0; }
       .management-metrics strong { display: block; font-size: 1.5rem; margin-top: 6px; }
       .management-chart { display: grid; gap: 12px; }
+      .management-chart > * { min-width: 0; overflow-wrap: anywhere; }
+      #management :is(h2, h3, p, label, th, td, caption) { overflow-wrap: anywhere; }
       .management-bar { height: 14px; background: #eee3d6; border-radius: 7px; overflow: hidden; }
       .management-bar span { display: block; height: 100%; background: #97472e; }
       .management-table { overflow: auto; max-height: 55vh; margin-top: 20px; }
