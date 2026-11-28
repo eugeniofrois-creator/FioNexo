@@ -995,9 +995,9 @@
           <h3 id="cashTitle">Registrar dinheiro · demonstração</h3>
           <p id="cashContext"></p>
           <label for="cashReceived">Valor entregue pelo cliente</label>
-          <input id="cashReceived" type="text" inputmode="decimal" maxlength="18" required aria-describedby="cashContext cashChange">
+          <input id="cashReceived" type="text" inputmode="decimal" maxlength="18" required aria-describedby="cashContext cashChange cashFeedback">
           <p id="cashChange" role="status"></p>
-          <label><input id="cashConfirmed" type="checkbox" required style="width:auto"> Confirmei o recebimento neste teste</label>
+          <label><input id="cashConfirmed" type="checkbox" required aria-describedby="cashFeedback" style="width:auto"> Confirmei o recebimento neste teste</label>
           <div class="chips">
             <button class="cta" type="submit">Confirmar dinheiro</button>
             <button class="pill" type="button" id="cancelCash">Cancelar</button>
