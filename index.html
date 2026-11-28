@@ -1716,7 +1716,7 @@
           ? "Horários livres mais próximos do horário digitado"
           : "Primeiros horários livres do dia";
         for (const t of available.slice(0, 8)) {
-          button(
+          const suggestion = button(
             "slots",
             clock(t) + " até " + clock(t + length * min),
             null,
@@ -1729,6 +1729,9 @@
             },
             "pill",
           );
+        suggestion.setAttribute("aria-label",
+            "Selecionar " + clock(t) + " até " + clock(t + length * min) +
+            ", " + label(t) + ", com " + staff[barber] + " em " + shop.name);
         }
         const summaryText =
           "Serviço: " + name + " · " + length + " min\n" +
