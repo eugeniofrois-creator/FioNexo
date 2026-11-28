@@ -1462,12 +1462,15 @@
       function nextAvailable() {
         const duration = services[service][1] * min;
         const searchStart = new Date();
+        const step = 15 * min;
         for (let offset = 0; offset < 7; offset++) {
           const date = new Date(searchStart);
           date.setDate(searchStart.getDate() + offset);
           const key = dateKey(date);
+          const opening = at(key, "09:00");
           const latestStart = at(key, "18:00") - duration;
-          for (let time = at(key, "09:00"); time <= latestStart; time += 15 * min) {
+          const elapsedSteps = Math.max(0, Math.floor((+searchStart - opening) / step) + 1);
+          for (let time = opening + elapsedSteps * step; time <= latestStart; time += step) {
             if (free(time, key, duration, barber)) return { day: key, time };
           }
         }
