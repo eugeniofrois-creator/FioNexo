@@ -2027,8 +2027,10 @@ function renderRescheduleSlots() {
         const date = input.value,
           index = staff.indexOf(r.barber),
           previous = select.value;
+        const validDate = Boolean(input.value) && input.validity.valid;
+        input.setAttribute("aria-invalid", String(!validDate));
         select.replaceChildren();
-        if (input.validity.valid && index >= 0 && eligible) {
+        if (validDate && index >= 0 && eligible) {
           const duration = r.end - r.start;
           const latestStart = at(date, "18:00") - duration;
           for (let t = at(date, "09:00"); t <= latestStart; t += 15 * min) {
@@ -2046,7 +2048,7 @@ function renderRescheduleSlots() {
         const feedbackText = empty
           ? !eligible
             ? expiredRescheduleText
-            : !input.value || !input.validity.valid
+            : !validDate
               ? "Preencha uma data válida no período permitido. Sua reserva atual foi mantida."
               : state.shopClosed?.[shop.id]
                 ? "Esta barbearia está fechada para novas reservas e remarcações. Sua reserva atual foi mantida. Consulte novamente quando ela reabrir."
