@@ -3096,7 +3096,7 @@ function openCashRecord(id) {
          voiceNotice("Leitura em voz alta desativada.");
          return;
        }
-       const message = "Leitura em voz alta ativada. Clique em um título, texto ou rótulo da agenda para ouvi-lo.";
+       const message = "Leitura em voz alta ativada. Clique em um título, texto ou rótulo da agenda para ouvi-lo. Pressione Escape para interromper a fala.";
        voiceNotice(message);
        announceOptions("shop");
       };
@@ -3142,7 +3142,12 @@ function openCashRecord(id) {
       }
 
 
-      document.addEventListener("click", (event) => {
+document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || audioControl.getAttribute("aria-pressed") !== "true") return;
+        clearSpokenText();
+        window.speechSynthesis?.cancel();
+      });
+            document.addEventListener("click", (event) => {
   if (audioControl.getAttribute("aria-pressed") !== "true") return;
   if (!(event.target instanceof Element)) return;
 
