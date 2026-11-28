@@ -3009,6 +3009,9 @@ function openCashRecord(id) {
         save("Intervalo iniciado até " + clock(pauseEnd(p, now)) + ".");
       };
       $("toggle").onclick = () => {
+        clearSpokenText();
+        window.speechSynthesis?.cancel();
+        
         const show = $("panel").hidden;
         $("panel").hidden = !show;
         $("toggle").setAttribute("aria-expanded", String(show));
