@@ -1942,25 +1942,9 @@
       };
       let bookingToMove;
       function cancelBooking(r) {
-        if (
-          canChange(r) &&
-          !window.confirm(
-            "Cancelar sua reserva" +
-              (r.serviceName ? " de " + r.serviceName : "") +
-              " em " +
-              shop.name +
-              " com " +
-              r.barber +
-              " no dia " +
-              label(r.start) +
-              " das " +
-              clock(r.start) +
-              " às " +
-              clock(r.end) +
-              "?",
-          )
-        )
-          return;
+        const context = reservationServiceLabel(r) + " em " + shop.name + " com " + r.barber +
+          " no dia " + label(r.start) + " das " + clock(r.start) + " às " + clock(r.end);
+        if (canChange(r) && !window.confirm("Cancelar sua reserva de " + context + "?")) return;
         if (!canChange(r)) {
           const message = "Esta reserva já não pode ser cancelada.";
           save(message);
@@ -1968,9 +1952,7 @@
           return;
         }
         r.status = "cancelled";
-        const message =
-          "Reserva cancelada em " + shop.name + " com " + r.barber +
-          " no dia " + label(r.start) + " às " + clock(r.start) + ".";
+        const message = "Reserva cancelada: " + context + ".";
         save(message);
         speakVoice(message, "notice");
       }
